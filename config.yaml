@@ -1,0 +1,78 @@
+# Snowflake Configuration
+snowflake:
+  account: ${SNOWFLAKE_ACCOUNT}
+  user: ${SNOWFLAKE_USER}
+  authenticator: externalbrowser
+  role: ${SNOWFLAKE_ROLE}
+  warehouse: ${SNOWFLAKE_WAREHOUSE}
+  database: ${SNOWFLAKE_DATABASE}
+  schema: ${SNOWFLAKE_SCHEMA}
+
+# Excel Output Configuration
+excel:
+  output_file: "Incentive_Report.xlsx"
+  overwrite: true  # true = overwrite sheets, false = append
+  auto_width: true
+  freeze_header: true
+  header_style:
+    font:
+      bold: true
+      color: "FFFFFF"
+    fill:
+      type: "solid"
+      color: "4472C4"
+
+# Query Configuration Table (can also be stored in Excel/DB)
+queries:
+  - name: "Inspection Feedback Report"
+    sql: |
+      select  t4.*,fb.feedback_rating, fb.created_at,fb.feedbacks, fb.additional_comment,
+      fo."Store Type", fo.verified, fo.store_name
+       FROM
+      (SELECT distinct
+        il.appointment_id,
+        il.inspection_by,
+        il.version,
+        il.inspection_status,
+        cl.region,
+        cl.city,
+        cl.centre,
+        date(il.inspection_end_time) AS dat
+      FROM CSPL_C2B_DB.MONGO_INS_INSENGINEAPI_PROD.INSPECTION_LOG il
+          LEFT JOIN CSPL_C2B_DB.PROD.CENTRE_LIST cl   ON cl.centre_id = il.store_id
+          WHERE version = 0 
+          and inspection_status ='done' 
+          and il.inspection_end_time::date between '2026-04-01' and '2026-04-30'
+      ) t4
+      left join
+      (SELECT appointment_id, feedback_rating, created_at,feedbacks, additional_comment,
+      DENSE_RANK() OVER (PARTITION BY APPOINTMENT_ID ORDER BY CREATED_AT DESC) AS RNK
+          FROM CSPL_C2B_DB.MONGO_INS_INSENGINEAPI_PROD.INS_CJ_FEEDBACK
+          where feedback_rating is not null
+          QUALIFY RNK = 1
+      ) fb on fb.appointment_id = t4.appointment_id
+      left join 
+      (select pub_appt_id, "Store Type", verified,store_name from CSPL_C2B_DB.PROD.APPT_LATEST_INFO ) fo on fo.pub_appt_id = t4.appointment_id
+    sheet_name: "Inspection_Feedback"
+    refresh_frequency: "manual"
+    enabled: true
+
+# Scheduler Configuration
+scheduler:
+  enabled: true
+  timezone: "Asia/Kolkata"
+  daily_time: "09:00"  # HH:MM format
+  weekly_day: "monday"  # monday, tuesday, etc.
+  weekly_time: "09:00"
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "logs/incentive_automation.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# Performance Configuration
+performance:
+  max_parallel_queries: 5
+  query_timeout: 300  # seconds

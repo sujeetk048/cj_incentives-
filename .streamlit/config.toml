@@ -1,0 +1,17 @@
+[browser]
+gatherUsageStats = false
+
+[server]
+headless = true
+port = 8501
+address = "0.0.0.0"
+enableStaticServing = true
+runOnSave = true
+
+[theme]
+base = "light"
+primaryColor = "#3245FF"
+backgroundColor = "#f5f7fa"
+secondaryBackgroundColor = "#ffffff"
+textColor = "#1a1a2e"
+font = "sans serif"

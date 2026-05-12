@@ -1,0 +1,45 @@
+Category,Sub_Category,Region_or_Condition,Slab_or_Range,Amount_or_Payout,Notes
+Incentive,Productivity,T7 Regions,3 Inspections/Day,0,
+Incentive,Productivity,T7 Regions,4 Inspections/Day,0,
+Incentive,Productivity,T7 Regions,5 Inspections/Day,100,
+Incentive,Productivity,T7 Regions,6 Inspections/Day,300,
+Incentive,Productivity,T7 Regions,7 Inspections/Day,500,
+Incentive,Productivity,T7 Regions,8 Inspections/Day,800,
+Incentive,Productivity,T7 Regions,9+ Inspections/Day,1000,
+Incentive,Productivity,Non T7,3 Inspections/Day,0,
+Incentive,Productivity,Non T7,4 Inspections/Day,50,
+Incentive,Productivity,Non T7,5 Inspections/Day,150,
+Incentive,Productivity,Non T7,6 Inspections/Day,300,
+Incentive,Productivity,Non T7,7 Inspections/Day,500,
+Incentive,Productivity,Non T7,8 Inspections/Day,700,
+Incentive,Productivity,Non T7,9+ Inspections/Day,1000,
+Incentive,SP / SP Lite,All,1 Order/Day,40,
+Incentive,SP / SP Lite,All,2 Orders/Day,130,
+Incentive,SP / SP Lite,All,3 Orders/Day,200,
+Incentive,SP / SP Lite,All,4 Orders/Day,300,
+Incentive,SP / SP Lite,All,5 Orders/Day,400,
+Incentive,SP / SP Lite,All,6 Orders/Day,500,
+Incentive,SP / SP Lite,All,7 Orders/Day,600,
+Incentive,SP / SP Lite,All,8 Orders/Day,700,
+Incentive,SP / SP Lite,All,9+ Orders/Day,800,
+Incentive,SP Pro,All,Per inspection,150,Rs. 150 per inspection
+Incentive,Excellence Bonus,All,>120 Inspections/Month + 70% Conversion,3000,Rs. 3000 per month
+Incentive,PDI,All,Per inspection,50,Rs. 50 per inspection
+Incentive,CJ 5 Star Rating,All,Per 5-star rated inspection,10,Rs. 10 per inspection
+Incentive,Night Inspection,All,Per inspection (6 PM - 10 PM only),150,Booked AND inspected in night slots
+Penalty,IM,All,RFC 1 - 2000,500,
+Penalty,IM,All,RFC 2001 - 5000,1000,
+Penalty,IM,All,RFC 5001 - 7500,1500,
+Penalty,IM,All,RFC 7501 - 10000,2500,
+Penalty,Critical IM (Regular CJ),All,INR 10000 - 13500,Half Incentive (Incl. VAS),
+Penalty,Critical IM (Regular CJ),All,INR 13501 - 19999,Zero Incentive (Incl. VAS),
+Penalty,Critical IM (Regular CJ),All,Single IM >= INR 20000,CJ Exit,
+Penalty,Critical IM (Regular CJ),All,Two Critical IMs,CJ Exit,
+Penalty,Critical IM (0-60 Days from DOJ),All,INR 10000 - 13500,INR 2500,
+Penalty,Critical IM (0-60 Days from DOJ),All,INR 13501 - 19999,Zero Incentive,
+Penalty,Critical IM (0-60 Days from DOJ),All,Single IM >= INR 20000,Zero Incentive,
+Penalty,Critical IM (0-60 Days from DOJ),All,Two Critical IMs,Zero Incentive,
+Penalty,1 Star Rating,All,Per 1-star rated inspection,200,Rs. 200 per inspection
+Reimbursement,Conveyance,All,Per Km,6,Inspection Done cases only (exceptions allowed case-by-case)
+Note,Tipping,All,—,—,No change. Full tip amount passed to CJ.
+Note,Referral,All,Per Referral,4000,No change in CJ Referral Policy
