@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- VERSION: 3.0 - April 2026 - Expanded input tabs -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A2I Cost Per Inspection v2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--p:#0D1235;--a:#3245FF;--a2:#00c4cc;--bg:#f0f3fa;--card:#fff;--bdr:#e0e6f0;--txt:#1a2b5e;--mu:#6b7a99;--gr:#10b981;--rd:#ef4444;--or:#f59e0b;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--txt);font-size:13px;}
+/* HEADER */
+.hdr{background:linear-gradient(135deg,#0D1235,#1a2b6e 50%,#3245FF);color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}
+.hdr h1{font-size:17px;font-weight:800;letter-spacing:.5px;}
+.hdr .sub{font-size:10px;opacity:.7;margin-top:2px;}
+/* MAIN TABS */
+.main-tabs{background:var(--p);display:flex;overflow-x:auto;gap:0;flex-wrap:nowrap;}
+.mtab{padding:10px 16px;color:rgba(255,255,255,.6);cursor:pointer;font-size:11.5px;font-weight:600;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;}
+.mtab:hover{color:#fff;background:rgba(255,255,255,.08);}
+.mtab.active{color:#fff;border-bottom-color:var(--a2);background:rgba(255,255,255,.1);}
+/* PAGE */
+.page{display:none;padding:14px;}
+.page.active{display:block;}
+/* PROCESS FILTER BAR */
+.proc-bar{display:flex;align-items:center;gap:8px;background:#fff;padding:10px 16px;border-bottom:2px solid var(--bdr);flex-wrap:wrap;}
+.proc-label{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;margin-right:4px;}
+.proc-btn{padding:5px 16px;border-radius:20px;font-size:11.5px;font-weight:700;cursor:pointer;border:2px solid var(--bdr);background:#fff;color:var(--mu);transition:all .2s;}
+.proc-btn:hover{border-color:var(--a);color:var(--a);}
+.proc-btn.active-HI{border-color:#8b5cf6;background:#8b5cf6;color:#fff;}
+.proc-btn.active-Growth{border-color:#10b981;background:#10b981;color:#fff;}
+.proc-btn.active-PDI{border-color:#f59e0b;background:#f59e0b;color:#fff;}
+.proc-btn.active-All{border-color:var(--a);background:var(--a);color:#fff;}
+.proc-desc{font-size:10px;color:var(--mu);margin-left:8px;font-style:italic;}
+/* FILTER ROW */
+.frow{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+.frow select,.frow input{border:1px solid var(--bdr);border-radius:6px;padding:5px 9px;font-size:11.5px;color:var(--txt);background:#fff;outline:none;}
+.frow select:focus{border-color:var(--a);}
+.flabel{font-size:10px;color:var(--mu);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+/* Zone checkboxes */
+.zone-checks{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--bdr);border-radius:6px;padding:6px 10px;}
+.zone-checks label{display:flex;align-items:center;gap:4px;font-size:11px;cursor:pointer;padding:3px 8px;border-radius:4px;transition:background .15s;}
+.zone-checks label:hover{background:var(--bg);}
+.zone-checks input[type="checkbox"]{width:14px;height:14px;cursor:pointer;accent-color:var(--a);}
+/* CLEAR BTN */
+.clear-btn{margin-left:auto;padding:5px 14px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--rd);background:#fff;color:var(--rd);transition:all .2s;}
+.clear-btn:hover{background:var(--rd);color:#fff;}
+/* KPI */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px;}
+.kc{background:#fff;border-radius:10px;padding:13px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid var(--a);}
+.kc.g{border-left-color:var(--gr);}
+.kc.o{border-left-color:var(--or);}
+.kc.r{border-left-color:var(--rd);}
+.kc.c{border-left-color:var(--a2);}
+.kc.v{border-left-color:#8b5cf6;}
+.kl{font-size:9.5px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;font-weight:700;}
+.kv{font-size:20px;font-weight:800;margin:3px 0 1px;}
+.ks{font-size:9.5px;color:var(--mu);}
+.kbadge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:9.5px;font-weight:700;margin-top:3px;}
+.kbadge.up{background:#dcfce7;color:#166534;}
+.kbadge.dn{background:#fee2e2;color:#991b1b;}
+/* CHARTS */
+.crow{display:grid;gap:12px;margin-bottom:12px;}
+.c2{grid-template-columns:1fr 1fr;}
+.c3{grid-template-columns:1fr 1fr 1fr;}
+.c1{grid-template-columns:1fr;}
+.cc{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.ct{font-size:11.5px;font-weight:700;color:var(--p);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.ct span{font-size:9.5px;font-weight:400;color:var(--mu);}
+canvas{max-height:250px;}
+/* PAGE HEADER BAR */
+.page-header-bar{background:linear-gradient(90deg,#0D1235,#1a2b6e);color:#fff;padding:9px 16px;font-size:12px;font-weight:700;letter-spacing:.3px;border-radius:8px 8px 0 0;margin-bottom:0;}
+/* INNER TABS (for input pages) */
+.itabs{display:flex;gap:0;border-bottom:2px solid var(--bdr);margin-bottom:12px;flex-wrap:wrap;}
+.itab{padding:7px 14px;font-size:11.5px;font-weight:600;cursor:pointer;color:var(--mu);border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+.itab.active{color:var(--a);border-bottom-color:var(--a);}
+.ipanel{display:none;}
+.ipanel.active{display:block;}
+/* TABLE */
+.twrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{background:var(--p);color:#fff;padding:7px 9px;text-align:right;font-weight:600;font-size:10px;white-space:nowrap;position:sticky;top:0;z-index:2;}
+th:first-child,th:nth-child(2),th:nth-child(3){text-align:left;}
+td{padding:6px 9px;border-bottom:1px solid var(--bdr);text-align:right;white-space:nowrap;}
+td:first-child,td:nth-child(2),td:nth-child(3){text-align:left;font-weight:600;}
+tr:hover td{background:#f5f7ff;}
+tr.tr{background:#eef1ff;font-weight:700;border-top:2px solid var(--a);}
+tr.zr{background:#f8f9ff;font-weight:600;}
+.b1{background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:8px;font-size:9px;}
+.b2{background:#f3f4f6;color:#6b7280;padding:1px 5px;border-radius:8px;font-size:9px;}
+.cg{color:var(--gr);font-weight:700;}
+.cw{color:var(--or);font-weight:700;}
+.cr{color:var(--rd);font-weight:700;}
+/* EDITABLE TABLE */
+.enote{font-size:10px;color:#3b82f6;background:#eff6ff;border-radius:5px;padding:5px 10px;margin-bottom:8px;border:1px solid #bfdbfe;}
+td.ec input{width:80px;border:1px solid transparent;border-radius:4px;padding:2px 5px;font-size:10.5px;text-align:right;background:transparent;outline:none;font-family:inherit;}
+td.ec input:focus{border-color:var(--a);background:#f0f7ff;}
+td.ec{padding:2px 4px;}
+/* IMPORT */
+.import-box{background:#fff;border-radius:10px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:14px;}
+.import-title{font-size:13px;font-weight:700;color:var(--p);margin-bottom:10px;}
+.drop-zone{border:2px dashed var(--bdr);border-radius:10px;padding:30px;text-align:center;color:var(--mu);cursor:pointer;transition:all .2s;margin-bottom:12px;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--a);background:#f0f3ff;color:var(--a);}
+.drop-zone .dz-icon{font-size:32px;margin-bottom:8px;}
+.drop-zone .dz-text{font-size:12px;font-weight:600;}
+.drop-zone .dz-sub{font-size:10px;margin-top:4px;}
+.import-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;}
+.import-col{flex:1;min-width:220px;}
+.import-col label{font-size:10px;font-weight:700;color:var(--mu);text-transform:uppercase;display:block;margin-bottom:5px;}
+.import-col select{width:100%;border:1px solid var(--bdr);border-radius:6px;padding:6px 9px;font-size:12px;}
+.btn{padding:7px 16px;border-radius:7px;font-size:11.5px;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+.btn-p{background:var(--a);color:#fff;}
+.btn-p:hover{background:#1a2bd4;}
+.btn-o{background:#fff;color:var(--a);border:1.5px solid var(--a);}
+.btn-o:hover{background:#f0f3ff;}
+.btn-g{background:#10b981;color:#fff;}
+.btn-r{background:#ef4444;color:#fff;}
+.import-status{margin-top:8px;font-size:11px;padding:6px 10px;border-radius:6px;display:none;}
+.import-status.ok{background:#dcfce7;color:#166534;display:block;}
+.import-status.err{background:#fee2e2;color:#991b1b;display:block;}
+/* REGION CARDS */
+.rcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.rcard{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);border-top:3px solid var(--a);transition:transform .15s;}
+.rcard:hover{transform:translateY(-2px);}
+.rcard.east{border-top-color:#8b5cf6;}
+.rcard.south{border-top-color:#10b981;}
+.rcard.west{border-top-color:#f59e0b;}
+.rcard.ndl{border-top-color:#ef4444;}
+.rcard.ron{border-top-color:#06b6d4;}
+.rch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.rcn{font-size:15px;font-weight:800;color:var(--p);}
+.rcz{font-size:9px;color:var(--mu);margin-top:1px;}
+.rcm{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+.rci{background:var(--bg);border-radius:5px;padding:5px 6px;text-align:center;}
+.rcil{font-size:8.5px;color:var(--mu);font-weight:700;text-transform:uppercase;}
+.rciv{font-size:12px;font-weight:700;margin-top:1px;}
+/* SIM */
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ssec{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.stitle{font-size:13px;font-weight:700;color:var(--p);margin-bottom:12px;padding-bottom:7px;border-bottom:2px solid var(--bdr);}
+.srow{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.srow label{font-size:10.5px;color:var(--mu);width:170px;flex-shrink:0;font-weight:600;}
+.srow input{flex:1;border:1px solid var(--bdr);border-radius:6px;padding:5px 9px;font-size:11.5px;outline:none;}
+.srow input:focus{border-color:var(--a);}
+.srow input.synced{background:#eff6ff;border-color:#93c5fd;color:#1e40af;}
+.sresult{background:linear-gradient(135deg,#0D1235,#3245FF);color:#fff;border-radius:10px;padding:18px;text-align:center;margin-top:12px;}
+.sresult .sbig{font-size:34px;font-weight:800;margin:6px 0;}
+.sbdown{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px;}
+.sbi{background:rgba(255,255,255,.12);border-radius:6px;padding:7px;font-size:10.5px;}
+.sbi .sbl{opacity:.75;margin-bottom:2px;}
+.sbi .sbv{font-weight:700;font-size:12px;}
+.stoggle{display:flex;border-radius:8px;overflow:hidden;border:1px solid var(--a);margin-bottom:12px;}
+.stoggle button{flex:1;padding:6px;font-size:11px;font-weight:700;border:none;cursor:pointer;background:#fff;color:var(--a);transition:all .2s;}
+.stoggle button.active{background:var(--a);color:#fff;}
+.snote{font-size:10px;color:#3b82f6;background:#eff6ff;border-radius:5px;padding:5px 10px;margin-bottom:10px;border:1px solid #bfdbfe;display:none;}
+/* Process badge */
+.proc-info-bar{display:flex;gap:16px;padding:8px 14px;background:#f8f9ff;border-radius:8px;margin-bottom:12px;flex-wrap:wrap;}
+.pib{display:flex;align-items:center;gap:6px;font-size:10.5px;}
+.pib .pdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+@media(max-width:768px){.c2,.c3,.sgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div>
+    <h1>🚗 A2I Cost Per Inspection Dashboard</h1>
+    <div class="sub">CARS24 · Pan India · FY 2025-26 · May'25 – Feb'26</div>
+  </div>
+  <div style="text-align:right;font-size:10px;opacity:.8;">Span Level v2<br><span style="color:#00c4cc;font-weight:700;">LIVE DATA</span></div>
+</div>
+
+<!-- PROCESS FILTER BAR (global) -->
+<div class="proc-bar" id="proc-bar">
+  <span class="proc-label">Process:</span>
+  <button class="proc-btn active-All" onclick="setProcess('All')">📋 All</button>
+  <button class="proc-btn" onclick="setProcess('HI')">🔍 HI</button>
+  <button class="proc-btn" onclick="setProcess('Growth')">📈 Growth</button>
+  <button class="proc-btn" onclick="setProcess('PDI')">🔧 PDI</button>
+  <span class="proc-desc" id="proc-desc">Showing: All processes combined</span>
+</div>
+
+<!-- MAIN TABS -->
+<div class="main-tabs">
+  <div class="mtab active"  onclick="showPage('dash')">📊 Dashboard INS</div>
+  <div class="mtab" onclick="showPage('region')">🗺️ Region View</div>
+  <div class="mtab" onclick="showPage('sim')">🧮 Simulation</div>
+  <div class="mtab" onclick="showPage('insp')">📋 Input INSP</div>
+  <div class="mtab" onclick="showPage('cj')">👤 Input CJ</div>
+  <div class="mtab" onclick="showPage('cjm')">👥 Input CJM</div>
+  <div class="mtab" onclick="showPage('tc')">📞 Input TC</div>
+  <div class="mtab" onclick="showPage('reimb')">🚗 Input REIMB</div>
+  <div class="mtab" onclick="showPage('vas')">💊 Input VAS</div>
+  <div class="mtab" onclick="showPage('rev')">💰 Input REV</div>
+</div>
+
+<!-- ===== DASHBOARD PAGE ===== -->
+<div class="page active" id="page-dash">
+  <div class="frow">
+    <span class="flabel">Zone:</span>
+    <div class="zone-checks" id="dash-zone-filter">
+      <label><input type="checkbox" value="ALL" onchange="handleDashZone(this)" checked> All India</label>
+      <label><input type="checkbox" value="NDL" onchange="handleDashZone(this)"> NDL</label>
+      <label><input type="checkbox" value="East" onchange="handleDashZone(this)"> East</label>
+      <label><input type="checkbox" value="West" onchange="handleDashZone(this)"> West</label>
+      <label><input type="checkbox" value="South" onchange="handleDashZone(this)"> South</label>
+      <label><input type="checkbox" value="RoN" onchange="handleDashZone(this)"> RoN</label>
+    </div>
+    <span class="flabel">Month:</span>
+    <select id="d-month" onchange="renderDash()">
+      <option value="9">Feb'26 (Latest)</option><option value="8">Jan'26</option>
+      <option value="7">Dec'25</option><option value="6">Nov'25</option>
+      <option value="5">Oct'25</option><option value="4">Sep'25</option>
+      <option value="3">Aug'25</option><option value="2">Jul'25</option>
+      <option value="1">Jun'25</option><option value="0">May'25</option>
+    </select>
+    <span class="flabel">CoI Type:</span>
+    <select id="d-coi" onchange="renderDash()">
+      <option value="net">Net CoI (Incl. Revenue)</option>
+      <option value="gross">Gross CoI (Excl. Revenue)</option>
+    </select>
+    <button class="clear-btn" onclick="clearPage('dash')">🗑 Clear Page</button>
+  </div>
+  <div class="kpi-row" id="d-kpi"></div>
+  <div class="proc-info-bar" id="d-proc-info"></div>
+  <div class="crow c2">
+    <div class="cc"><div class="ct">Cost Per Inspection Trend <span id="d-trend-lbl"></span></div><canvas id="c-trend"></canvas></div>
+    <div class="cc"><div class="ct">Inspections Trend <span></span></div><canvas id="c-insp"></canvas></div>
+  </div>
+  <div class="crow c2">
+    <div class="cc"><div class="ct">Cost Breakdown – Selected Month <span id="d-mb"></span></div><canvas id="c-break"></canvas></div>
+    <div class="cc"><div class="ct">CoI by Zone – Selected Month</div><canvas id="c-zone"></canvas></div>
+  </div>
+  <div class="cc" style="margin-bottom:12px;"><div class="ct">Region CoI – Selected Month <span>Sorted Low→High</span></div><canvas id="c-reg" style="max-height:300px;"></canvas></div>
+  <div class="cc"><div class="ct">Full MoM Table</div><div class="twrap" id="d-table"></div></div>
+</div>
+
+<!-- ===== REGION PAGE ===== -->
+<div class="page" id="page-region">
+  <div class="frow">
+    <span class="flabel">Zone:</span>
+    <select id="r-zone" onchange="renderRegion()"><option value="ALL">All</option><option value="NDL">NDL</option><option value="East">East</option><option value="West">West</option><option value="South">South</option><option value="RoN">RoN</option></select>
+    <span class="flabel">Sort:</span>
+    <select id="r-sort" onchange="renderRegion()"><option value="coi_asc">CoI Low→High</option><option value="coi_desc">CoI High→Low</option><option value="insp_desc">Insp High→Low</option><option value="name">Name A-Z</option></select>
+    <button class="clear-btn" onclick="clearPage('region')">🗑 Clear Page</button>
+  </div>
+  <div class="rcgrid" id="r-grid"></div>
+</div>
+
+<!-- ===== SIMULATION PAGE ===== -->
+<div class="page" id="page-sim">
+  <div class="frow"><button class="clear-btn" onclick="clearPage('sim')">🗑 Clear Page</button></div>
+  <div class="sgrid">
+    <div class="ssec">
+      <div class="stitle">🔢 Simulation Input</div>
+      <div class="stoggle">
+        <button class="active" id="sm-m" onclick="setSimMode('manual')">✍️ Fully Manual</button>
+        <button id="sm-s" onclick="setSimMode('semi')">🔗 Semi-Sync</button>
+      </div>
+      <div class="snote" id="s-snote">🔗 Blue fields auto-synced from data. Override any value manually.</div>
+      <div style="margin-bottom:10px;">
+        <div style="font-size:10px;font-weight:700;color:var(--mu);margin-bottom:4px;">Reference Region:</div>
+        <select id="s-reg" onchange="syncSim()" style="width:100%;border:1px solid var(--bdr);border-radius:6px;padding:6px 9px;font-size:12px;margin-bottom:6px;"><option value="">-- Select --</option></select>
+        <select id="s-mo" onchange="syncSim()" style="width:100%;border:1px solid var(--bdr);border-radius:6px;padding:6px 9px;font-size:12px;">
+          <option value="9">Feb'26</option><option value="8">Jan'26</option><option value="7">Dec'25</option><option value="6">Nov'25</option><option value="5">Oct'25</option><option value="4">Sep'25</option><option value="3">Aug'25</option><option value="2">Jul'25</option><option value="1">Jun'25</option><option value="0">May'25</option>
+        </select>
+      </div>
+      <div class="srow"><label>Total Inspections</label><input type="number" id="si-insp" value="5000" oninput="calcSim()"></div>
+      <div class="srow"><label>CJ Salary (₹)</label><input type="number" id="si-cjsal" value="2000000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>CJ Incentive (₹)</label><input type="number" id="si-cjinc" value="200000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>CJM Salary (₹)</label><input type="number" id="si-cjmsal" value="150000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>CJM Incentive (₹)</label><input type="number" id="si-cjminc" value="30000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>TC Salary (₹)</label><input type="number" id="si-tcsal" value="0" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>Conveyance (₹)</label><input type="number" id="si-conv" value="150000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>PDI Revenue (₹)</label><input type="number" id="si-pdir" value="100000" oninput="calcSim()" class="sf"></div>
+      <div class="srow"><label>CHR Revenue (₹)</label><input type="number" id="si-chrr" value="500000" oninput="calcSim()" class="sf"></div>
+    </div>
+    <div>
+      <div class="sresult">
+        <div style="font-size:11px;opacity:.8;">COST PER INSPECTION (NET)</div>
+        <div class="sbig" id="s-coi">₹0</div>
+        <div style="font-size:11px;opacity:.7;" id="s-gross">Gross CoI: ₹0</div>
+        <div class="sbdown" id="s-bdown"></div>
+      </div>
+      <div class="cc" style="margin-top:12px;"><div class="ct">Cost Breakdown</div><canvas id="c-spie"></canvas></div>
+      <div class="cc" style="margin-top:12px;"><div class="ct">Scenario vs Actual</div><canvas id="c-scomp"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INPUT INSP ===== -->
+<div class="page" id="page-insp">
+  <div class="page-header-bar">📋 Input INSP — Inspection Count (Excl. B2B, SOF, MAX, Stealth, Training)</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('insp','insp-manual',this)">📝 Manual Entry</div>
+    <div class="itab" onclick="switchITab2('insp','insp-import',this)">📥 Import CSV</div>
+  </div>
+  <div class="ipanel active" id="insp-manual">
+    <div class="enote">✏️ Enter total inspection counts per region per month. Excludes B2B, SOF, Max, Stealth, Training types. Changes reflect instantly in Dashboard.</div>
+    <div class="frow">
+      <span class="flabel">Zone Filter:</span>
+      <div class="zone-checks" id="insp-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('insp-tbl','insp-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('insp-tbl','insp-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('insp-tbl','insp-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('insp-tbl','insp-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('insp-tbl','insp-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('insp_manual_keys')">🗑 Clear All Values</button>
+    </div>
+    <div class="twrap" id="insp-tbl"></div>
+  </div>
+  <div class="ipanel" id="insp-import">
+    <div id="insp-imp-ui"></div>
+  </div>
+</div>
+
+<!-- ===== INPUT CJ ===== -->
+<div class="page" id="page-cj">
+  <div class="page-header-bar">👤 Input CJ — Customer Journey Staff Cost Data</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('cj','cj-salary',this)">💰 CJ Salary</div>
+    <div class="itab" onclick="switchITab2('cj','cj-incentive',this)">🎁 CJ Incentive</div>
+    <div class="itab" onclick="switchITab2('cj','cj-sal-import',this)">📥 Import – Salary</div>
+    <div class="itab" onclick="switchITab2('cj','cj-inc-import',this)">📥 Import – Incentive</div>
+  </div>
+
+  <!-- CJ Salary Manual -->
+  <div class="ipanel active" id="cj-salary">
+    <div class="enote">💰 <b>CJ Salary</b> — Monthly gross salary paid to Customer Journey staff, region-wise (₹). This is the largest cost component in CoI calculation.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="cj-sal-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('cj-sal-tbl','cj-sal-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('cj-sal-tbl','cj-sal-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('cj-sal-tbl','cj-sal-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('cj-sal-tbl','cj-sal-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('cj-sal-tbl','cj-sal-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('cj_sal')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="cj-sal-tbl"></div>
+  </div>
+
+  <!-- CJ Incentive Manual -->
+  <div class="ipanel" id="cj-incentive">
+    <div class="enote">🎁 <b>CJ Incentive</b> — Performance-based incentive paid to CJs monthly (₹). Includes daily incentive, consistency bonus, IM bonus, stockin bonus. Separate from Night incentive.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="cj-inc-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('cj-inc-tbl','cj-inc-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('cj-inc-tbl','cj-inc-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('cj-inc-tbl','cj-inc-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('cj-inc-tbl','cj-inc-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('cj-inc-tbl','cj-inc-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('cj_inc')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="cj-inc-tbl"></div>
+  </div>
+
+  <!-- Import panels -->
+  <div class="ipanel" id="cj-sal-import"><div id="cj-sal-imp-ui"></div></div>
+  <div class="ipanel" id="cj-inc-import"><div id="cj-inc-imp-ui"></div></div>
+</div>
+
+<!-- ===== INPUT CJM ===== -->
+<div class="page" id="page-cjm">
+  <div class="page-header-bar">👥 Input CJM — CJ Manager Cost Data</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('cjm','cjm-salary',this)">💰 CJM Salary</div>
+    <div class="itab" onclick="switchITab2('cjm','cjm-incentive',this)">🎁 CJM Incentive</div>
+    <div class="itab" onclick="switchITab2('cjm','cjm-sal-import',this)">📥 Import – Salary</div>
+    <div class="itab" onclick="switchITab2('cjm','cjm-inc-import',this)">📥 Import – Incentive</div>
+  </div>
+
+  <!-- CJM Salary -->
+  <div class="ipanel active" id="cjm-salary">
+    <div class="enote">💰 <b>CJM Salary</b> — Monthly gross salary paid to Customer Journey Managers (₹). CJMs manage CJ teams at regional level. This covers both T7 and T1 region CJMs.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="cjm-sal-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('cjm-sal-tbl','cjm-sal-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('cjm-sal-tbl','cjm-sal-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('cjm-sal-tbl','cjm-sal-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('cjm-sal-tbl','cjm-sal-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('cjm-sal-tbl','cjm-sal-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('cjm_sal')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="cjm-sal-tbl"></div>
+  </div>
+
+  <!-- CJM Incentive -->
+  <div class="ipanel" id="cjm-incentive">
+    <div class="enote">🎁 <b>CJM Incentive</b> — Performance incentive paid to CJMs based on team KPIs (₹). Includes slot adherence, inspection quality, and team productivity metrics.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="cjm-inc-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('cjm-inc-tbl','cjm-inc-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('cjm-inc-tbl','cjm-inc-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('cjm-inc-tbl','cjm-inc-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('cjm-inc-tbl','cjm-inc-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('cjm-inc-tbl','cjm-inc-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('cjm_inc')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="cjm-inc-tbl"></div>
+  </div>
+
+  <!-- Import panels -->
+  <div class="ipanel" id="cjm-sal-import"><div id="cjm-sal-imp-ui"></div></div>
+  <div class="ipanel" id="cjm-inc-import"><div id="cjm-inc-imp-ui"></div></div>
+</div>
+
+<!-- ===== INPUT TC ===== -->
+<div class="page" id="page-tc">
+  <div class="page-header-bar">📞 Input TC — Telecaller Cost Data</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('tc','tc-salary',this)">💰 TC Salary</div>
+    <div class="itab" onclick="switchITab2('tc','tc-sal-import',this)">📥 Import CSV</div>
+  </div>
+
+  <!-- TC Salary Manual -->
+  <div class="ipanel active" id="tc-salary">
+    <div class="enote">📞 <b>TC (Telecaller) Salary</b> — Monthly salary of Telecallers supporting the A2I team (₹). Pan-India TC count reduced from 39 TC to 27 TC mid-year.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="tc-sal-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('tc-sal-tbl','tc-sal-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('tc-sal-tbl','tc-sal-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('tc-sal-tbl','tc-sal-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('tc-sal-tbl','tc-sal-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('tc-sal-tbl','tc-sal-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('tc_sal')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="tc-sal-tbl"></div>
+  </div>
+
+  <!-- Import panel -->
+  <div class="ipanel" id="tc-sal-import"><div id="tc-sal-imp-ui"></div></div>
+</div>
+
+<!-- ===== INPUT REIMB ===== -->
+<div class="page" id="page-reimb">
+  <div class="page-header-bar">🚗 Input REIMB — Fuel Reimbursement / Conveyance</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('reimb','reimb-manual',this)">📝 Conveyance</div>
+    <div class="itab" onclick="switchITab2('reimb','reimb-import',this)">📥 Import CSV</div>
+  </div>
+  <div class="ipanel active" id="reimb-manual">
+    <div class="enote">🚗 <b>Fuel Reimbursement</b> — Monthly fuel/conveyance reimbursement paid to CJs for travel to inspection locations (₹). Tracked from internal expense tracker. Key cost driver for Tier-1 cities.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="reimb-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('reimb-tbl','reimb-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('reimb-tbl','reimb-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('reimb-tbl','reimb-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('reimb-tbl','reimb-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('reimb-tbl','reimb-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('conv')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="reimb-tbl"></div>
+  </div>
+  <div class="ipanel" id="reimb-import"><div id="reimb-imp-ui"></div></div>
+</div>
+
+<!-- ===== INPUT VAS ===== -->
+<div class="page" id="page-vas">
+  <div class="page-header-bar">💊 Input ~VAS — PDI & CHR Cost (Value Added Services)</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('vas','vas-pdi',this)">🔧 PDI Cost</div>
+    <div class="itab" onclick="switchITab2('vas','vas-chr',this)">🏥 CHR Cost</div>
+    <div class="itab" onclick="switchITab2('vas','vas-pdi-import',this)">📥 Import – PDI Cost</div>
+    <div class="itab" onclick="switchITab2('vas','vas-chr-import',this)">📥 Import – CHR Cost</div>
+  </div>
+
+  <!-- PDI Cost -->
+  <div class="ipanel active" id="vas-pdi">
+    <div class="enote">🔧 <b>PDI (Pre-Delivery Inspection) Cost</b> — Cost incurred per PDI inspection done by HI CJs (₹). PDI is a VAS add-on during home inspection. Billed per inspection. Revenue tracked separately in Input REV.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="vas-pdi-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('vas-pdi-tbl','vas-pdi-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('vas-pdi-tbl','vas-pdi-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('vas-pdi-tbl','vas-pdi-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('vas-pdi-tbl','vas-pdi-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('vas-pdi-tbl','vas-pdi-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('pdi_cost')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="vas-pdi-tbl"></div>
+  </div>
+
+  <!-- CHR Cost -->
+  <div class="ipanel" id="vas-chr">
+    <div class="enote">🏥 <b>CHR (Car Health Report) Cost</b> — Cost of generating CHR for inspected cars (₹). CHR is the detailed inspection report sold to buyers. This is a major VAS product. Revenue tracked in Input REV → CHR Revenue tab.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="vas-chr-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('vas-chr-tbl','vas-chr-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('vas-chr-tbl','vas-chr-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('vas-chr-tbl','vas-chr-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('vas-chr-tbl','vas-chr-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('vas-chr-tbl','vas-chr-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('chr_cost')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="vas-chr-tbl"></div>
+  </div>
+
+  <!-- Import panels -->
+  <div class="ipanel" id="vas-pdi-import"><div id="vas-pdi-imp-ui"></div></div>
+  <div class="ipanel" id="vas-chr-import"><div id="vas-chr-imp-ui"></div></div>
+</div>
+
+<!-- ===== INPUT REV ===== -->
+<div class="page" id="page-rev">
+  <div class="page-header-bar">💰 Input REV — PDI & CHR Revenue (offsets CoI)</div>
+  <div class="itabs">
+    <div class="itab active" onclick="switchITab2('rev','rev-pdi',this)">💵 PDI Revenue</div>
+    <div class="itab" onclick="switchITab2('rev','rev-chr',this)">💰 CHR Revenue</div>
+    <div class="itab" onclick="switchITab2('rev','rev-pdi-import',this)">📥 Import – PDI Rev</div>
+    <div class="itab" onclick="switchITab2('rev','rev-chr-import',this)">📥 Import – CHR Rev</div>
+  </div>
+
+  <!-- PDI Revenue -->
+  <div class="ipanel active" id="rev-pdi">
+    <div class="enote">💵 <b>PDI Revenue</b> — Gross revenue earned from PDI inspections done by HI CJs (₹). Sourced from billing system. This revenue directly reduces Net CoI. Ref: <span style="color:#3245FF;font-size:10px;">PDI billing tracker (Google Sheets)</span></div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="rev-pdi-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('rev-pdi-tbl','rev-pdi-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('rev-pdi-tbl','rev-pdi-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('rev-pdi-tbl','rev-pdi-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('rev-pdi-tbl','rev-pdi-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('rev-pdi-tbl','rev-pdi-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('pdi_rev')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="rev-pdi-tbl"></div>
+  </div>
+
+  <!-- CHR Revenue -->
+  <div class="ipanel" id="rev-chr">
+    <div class="enote">💰 <b>CHR Revenue</b> — Gross revenue from Car Health Reports sold (₹). Largest revenue offset in CoI calculation. Tracked by Abhin's team. When CHR Revenue is high, Net CoI drops significantly — key lever for profitability.</div>
+    <div class="frow">
+      <span class="flabel">Zone:</span>
+      <div class="zone-checks" id="rev-chr-zone-filter">
+        <label><input type="checkbox" value="NDL" onchange="filterInputTable('rev-chr-tbl','rev-chr-zone-filter')"> NDL</label>
+        <label><input type="checkbox" value="East" onchange="filterInputTable('rev-chr-tbl','rev-chr-zone-filter')"> East</label>
+        <label><input type="checkbox" value="West" onchange="filterInputTable('rev-chr-tbl','rev-chr-zone-filter')"> West</label>
+        <label><input type="checkbox" value="South" onchange="filterInputTable('rev-chr-tbl','rev-chr-zone-filter')"> South</label>
+        <label><input type="checkbox" value="RoN" onchange="filterInputTable('rev-chr-tbl','rev-chr-zone-filter')"> RoN</label>
+      </div>
+      <button class="clear-btn" onclick="clearInputTab2('chr_rev')">🗑 Clear All</button>
+    </div>
+    <div class="twrap" id="rev-chr-tbl"></div>
+  </div>
+
+  <!-- Import panels -->
+  <div class="ipanel" id="rev-pdi-import"><div id="rev-pdi-imp-ui"></div></div>
+  <div class="ipanel" id="rev-chr-import"><div id="rev-chr-imp-ui"></div></div>
+</div>
+
+<script>
+// ===== DATA =====
+const MONTHS=['May\'25','Jun\'25','Jul\'25','Aug\'25','Sep\'25','Oct\'25','Nov\'25','Dec\'25','Jan\'26','Feb\'26'];
+const MS=['MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC','JAN26','FEB26'];
+
+const RMETA={"ETR":{"zone":"East","ffh":"Amit","tier":"TIER2"},"ENL":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EML":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EAR":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EAS":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EJH":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EBR":{"zone":"East","ffh":"Amit","tier":"TIER2"},"EWB":{"zone":"East","ffh":"Amit","tier":"TIER1"},"EOR":{"zone":"East","ffh":"Amit","tier":"TIER2"},"ETA":{"zone":"East","ffh":"Amit","tier":"TIER2"},"NCR":{"zone":"NCR","ffh":"Ashutosh","tier":"TIER1"},"NDL":{"zone":"NDL","ffh":"Ashutosh","tier":"TIER1"},"NHP":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"NJK":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"NUK":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"NHR":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"UPW":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"NRJ":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"NPB":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"UPE":{"zone":"RoN","ffh":"Vaibhav","tier":"TIER2"},"STN":{"zone":"South","ffh":"Mohan","tier":"TIER2"},"SKL":{"zone":"South","ffh":"Mohan","tier":"TIER2"},"CHN":{"zone":"South","ffh":"Mohan","tier":"TIER1"},"SKA":{"zone":"South","ffh":"Mujahid","tier":"TIER2"},"BLR":{"zone":"South","ffh":"Mujahid","tier":"TIER1"},"SAP":{"zone":"South","ffh":"Rajesh","tier":"TIER2"},"STS":{"zone":"South","ffh":"Rajesh","tier":"TIER1"},"GJS":{"zone":"West","ffh":"Mujahid","tier":"TIER1"},"GJN":{"zone":"West","ffh":"Mujahid","tier":"TIER2"},"WMP":{"zone":"West","ffh":"Mujahid","tier":"TIER2"},"AMD":{"zone":"West","ffh":"Mujahid","tier":"TIER1"},"MUM":{"zone":"West","ffh":"Yadavendra","tier":"TIER1"},"WMH":{"zone":"West","ffh":"Yadavendra","tier":"TIER2"},"PUN":{"zone":"West","ffh":"Yadavendra","tier":"TIER1"}};
+
+const DATA={"AMD":{"insp":[4830,4967,5291,5173,5505,5396,5984,6034,5003,4427],"cj_sal":[652655,611388,611423,1829006,1952439,1925710,1994505,1681368,1716404,1560757],"cj_inc":[49660,75320,263000,169990,188410,181640,233990,220120,188402,172550],"cj_night_inc":[0,0,0,0,0,47700,22800,7200,4800,0],"cjm_sal":[179256,163948,150425,172474,169134,172474,209187,203036,206557,202840],"cjm_inc":[25749,11608,54292,22742,24632,51880,35600,42232,0,33480],"cjm_night_inc":[0,0,0,0,0,24000,15600,6000,0,0],"tc_sal":[46670,45366,44983,43888,50387,45802,24576,23087,24576,0],"conv":[96183,144779,160776,159174,158714,134464,148104,134684,122212,115611],"pdi_cost":[5150,5200,4950,9000,5050,5650,5300,4800,3150,2650],"chr_cost":[125490,128340,176590,116680,133390,104470,164880,158970,119390,115360],"pdi_rev":[118499,103593,109961,106522,138160,183017,197087,190282,160447,161733],"chr_rev":[655373,695990,962576,836562,914915,836171,956087,1044082,938008,954451]},"BLR":{"insp":[7751,7952,8201,8298,8831,9234,9132,9701,9455,7842],"cj_sal":[2705971,2439762,2726161,2591401,2916935,2559481,2790725,2697071,2749460,2887683],"cj_inc":[496310,521540,694940,804849,877720,790225,692735,732555,777122,739700],"cj_night_inc":[0,0,88200,299400,290700,189600,120000,47850,51900,0],"cjm_sal":[255984,241876,227800,187951,179533,187951,235097,220051,236561,225353],"cjm_inc":[76650,85596,103968,146047,108085,125720,58128,96352,69260,69260],"cjm_night_inc":[0,0,0,69600,51600,42000,18000,9000,0,0],"tc_sal":[35660,34236,34820,34298,16335,16335,16335,20000,21290,20645],"conv":[217382,323965,332046,332910,323631,314549,296187,291799,293552,249892],"pdi_cost":[27400,25050,28050,15600,22350,28200,27000,27050,21750,12600],"chr_cost":[359770,342180,451210,389130,383530,413290,394140,465600,479970,307500],"pdi_rev":[519008,489562,537422,323463,465706,779018,792268,936746,823818,696882],"chr_rev":[1733955,1857675,2338430,2350730,2459080,2614488,2483816,2949946,3047898,2632273]},"CHN":{"insp":[3272,3523,3767,3607,3764,3589,4158,4297,3977,3506],"cj_sal":[1283000,1060185,1191112,1161143,1200838,1182620,1217274,1269277,1293073,1267779],"cj_inc":[150460,206800,237765,121840,169790,169480,227960,270830,239960,212000],"cj_night_inc":[0,0,0,0,0,0,21000,22500,19050,0],"cjm_sal":[85045,79200,79200,82644,81695,82644,81695,79280,84190,79105],"cjm_inc":[9777,26636,21320,19288,1725,14480,12836,27992,4000,4000],"cjm_night_inc":[0,0,0,0,0,0,4500,9000,0,0],"tc_sal":[76746,69345,69345,70051,69697,69697,67813,70877,69275,46396],"conv":[118313,181140,175454,176414,183013,160232,181153,156581,148339,135629],"pdi_cost":[1900,3200,3550,6300,2550,2500,3000,2900,2050,1700],"chr_cost":[135270,153290,176320,110370,153850,135030,158000,187680,158370,137890],"pdi_rev":[44309,72193,79347,63951,74585,96451,104664,125009,108237,136089],"chr_rev":[718386,823867,1000850,877440,978213,954281,988205,1124995,1101514,1078925]},"EAS":{"insp":[284,409,515,486,433,562,599,521,392,408],"cj_sal":[139756,150725,161889,147083,156799,206320,189560,140374,123755,125589],"cj_inc":[19630,24840,35580,31810,24290,17630,9340,6980,4170,4170],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[12138,22511,28312,23606,22642,22809,18049,14291,11753,11068],"pdi_cost":[500,650,650,300,550,1100,900,50,0,50],"chr_cost":[16200,16170,23430,28430,18470,12960,7740,4290,3120,3590],"pdi_rev":[10191,15174,14721,13190,17988,38938,36581,39412,12994,37344],"chr_rev":[68315,81075,140338,123185,98930,88943,69180,65292,55905,47034]},"EBR":{"insp":[1257,1230,1340,1593,1680,1643,1475,1636,1623,1418],"cj_sal":[407847,373487,461350,500648,431279,506185,546648,484682,527586,487298],"cj_inc":[71490,85260,56925,53060,63480,65000,52460,87885,77215,70520],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[41677,57052,52732,63754,62275,59822,55385,41786,43338,37384],"pdi_cost":[950,900,1600,1600,750,3800,1550,1450,1150,750],"chr_cost":[52910,46660,43380,63690,55690,57660,47170,53180,44220,41150],"pdi_rev":[21688,15094,37089,27879,25856,131159,56117,67539,76685,49698],"chr_rev":[247457,231385,284277,301341,329335,321410,281332,337947,326385,347525]},"EJH":{"insp":[915,838,1014,1077,1210,1258,1142,1202,1087,907],"cj_sal":[199602,217514,221203,215134,275461,285997,306483,294916,290078,299537],"cj_inc":[35100,28800,37240,44390,45540,39780,34450,41300,31760,31760],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[26190,30970,34078,37290,41235,43285,33975,34135,32769,28331],"pdi_cost":[500,1050,1050,2700,1000,2650,1850,1000,850,800],"chr_cost":[24210,17990,26480,29000,32040,27850,18270,21270,20680,14270],"pdi_rev":[14374,15174,27164,26880,24276,105101,76752,54332,70969,89963],"chr_rev":[113789,97381,190690,133204,183663,165375,115755,157117,158109,179393]},"EOR":{"insp":[520,560,521,620,789,932,700,700,653,537],"cj_sal":[0,0,74945,186894,201996,238627,233626,196656,164186,164225],"cj_inc":[0,0,2900,34810,43220,44750,39680,41230,40720,38160],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[855,791,6972,20675,26125,29711,26857,26819,22506,18112],"pdi_cost":[50,100,650,0,1700,2550,2000,3500,2300,1500],"chr_cost":[480,360,2410,19590,27240,33180,28320,22740,23360,15760],"pdi_rev":[22328,29935,33159,35674,85644,124604,121725,223674,110951,107457],"chr_rev":[1994,2294,43309,85433,142165,172503,151742,145059,156643,124104]},"EWB":{"insp":[2609,2442,2688,2677,2462,2782,3147,3085,2989,2637],"cj_sal":[926077,919073,976564,958755,1020927,971856,1139327,1024731,1118648,1071334],"cj_inc":[146355,110545,152405,208515,151060,159850,187130,184320,111730,110580],"cj_night_inc":[0,0,0,0,0,0,0,0,900,0],"cjm_sal":[161343,148504,148444,154576,113677,218648,110444,142799,144267,96367],"cjm_inc":[26712,26898,19552,39879,82964,20472,4664,5000,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[33673,31869,33982,34438,35081,32250,35054,29934,31054,20272],"conv":[112689,156494,168088,152906,149146,145506,158258,138856,132339,120835],"pdi_cost":[4200,4900,5800,5700,3500,5350,8850,6450,3550,1650],"chr_cost":[83560,77180,103160,154690,126290,126800,138570,103700,79750,41250],"pdi_rev":[89883,110974,131197,145594,111274,190053,342843,307129,313644,290240],"chr_rev":[450003,429555,602096,705033,716460,716909,761357,699752,689672,684637]},"GJN":{"insp":[3182,3208,3476,3248,3542,3084,3250,3329,2759,2596],"cj_sal":[292189,270489,318260,457409,467008,500757,594542,604852,644884,619480],"cj_inc":[53070,58400,80000,64565,79030,66360,78160,118870,74950,74920],"cj_night_inc":[0,0,0,0,0,1500,0,0,3600,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[20196,30694,34562,30646,33944,35403,47495,41829,38664,42529],"pdi_cost":[500,450,400,2200,500,1600,1500,1550,850,1050],"chr_cost":[40090,47660,69050,61170,67330,53550,63390,67580,45410,42630],"pdi_rev":[26457,31427,22288,23283,48041,76875,83703,93739,57406,85615],"chr_rev":[174046,217040,411794,262083,321192,308539,377515,424947,352356,366042]},"GJS":{"insp":[2743,2703,2641,2674,2761,2702,3005,3319,2703,2393],"cj_sal":[534779,541089,620437,908128,828465,915767,963660,845073,919261,825805],"cj_inc":[140780,81235,123470,143170,126970,114680,130770,300830,151410,136030],"cj_night_inc":[0,0,0,0,0,300,0,0,900,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,5416,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[75763,107961,111134,122737,108516,99589,108118,103709,86303,74436],"pdi_cost":[2650,2500,2500,5900,2200,2550,2400,3350,2000,1200],"chr_cost":[90900,80910,104750,118610,85390,84390,101380,152340,88680,81190],"pdi_rev":[55113,59297,55407,36972,57601,80092,75802,104394,70763,61197],"chr_rev":[457134,449110,564722,548382,534865,513099,587656,822790,668774,615352]},"MUM":{"insp":[7221,7446,8033,7671,8580,8899,9427,9335,8952,7845],"cj_sal":[2441962,2535051,2777429,3145545,3252446,3074585,3067409,3270413,3220669,2846962],"cj_inc":[417820,389985,360050,311765,400845,386875,475895,366070,440298,378910],"cj_night_inc":[0,0,300,0,0,0,0,0,14550,0],"cjm_sal":[168350,131248,106437,145865,245682,184615,349169,177097,189799,180451],"cjm_inc":[20169,9304,8496,44507,18520,56700,66044,4300,14208,16208],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[29485,9749,38166,23080,19022,23075,24891,56979,22056,31164],"conv":[201257,263890,271810,269078,283153,276776,296321,255642,249346,221276],"pdi_cost":[16950,17400,17850,5100,13150,16150,16150,8650,7450,5350],"chr_cost":[240270,214490,225580,210240,263880,268190,321440,249100,264030,195880],"pdi_rev":[334780,344857,347182,284592,334688,506120,557411,554753,547417,544955],"chr_rev":[1366464,1404605,1550589,1591362,1943425,1906898,2036200,2099438,2121116,1914725]},"NDL":{"insp":[26781,26540,26801,24423,27507,27133,26164,29372,26680,23309],"cj_sal":[8601910,8989935,11334862,14615563,13649795,11774986,10945296,9721313,9422683,8738500],"cj_inc":[1311995,1273150,1210895,1058250,1353290,1261660,1516535,1546725,1244268,1171465],"cj_night_inc":[0,0,14400,107700,309900,371700,512400,186600,159600,0],"cjm_sal":[476464,475537,477054,450306,71801,551808,62424,673731,702838,595409],"cjm_inc":[125082,76986,67130,71801,49520,62424,66044,83756,96588,99452],"cjm_night_inc":[0,0,0,14400,16800,17400,18000,9300,7500,0],"tc_sal":[210162,361239,383607,444711,436266,403414,437475,171676,186885,248480],"conv":[877022,1183642,1210958,1160098,1129171,1066854,1015328,906965,867497,843390],"pdi_cost":[52200,52400,65850,53000,54200,72900,51400,51850,34400,18800],"chr_cost":[766110,770300,773060,529810,691910,600650,737540,931630,726240,543180],"pdi_rev":[1015987,1018958,1341103,879949,1343111,2214750,1594399,2454705,1853462,1613136],"chr_rev":[3917844,3999315,4763791,4375522,5004925,4877741,5114484,6121474,5763098,5182538]},"NHR":{"insp":[3517,3782,3952,3855,3336,3440,3230,3526,3246,2242],"cj_sal":[263836,657874,637052,567633,128407,136704,160876,123483,151583,298673],"cj_inc":[27600,69230,75200,15520,5870,5670,4690,10805,10580,15550],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[26098,25344,25344,26728,25344,26728,26159,25344,26974,0],"cjm_inc":[0,0,0,0,0,0,0,0,3792,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[38561,96001,84836,49861,12389,11137,5858,7990,6754,15740],"pdi_cost":[700,1350,2000,800,300,250,200,100,400,50],"chr_cost":[8470,50560,60720,40950,7040,4270,3570,8280,7790,6800],"pdi_rev":[38567,40406,59550,35973,50059,78647,66503,74540,64049,51274],"chr_rev":[76691,273009,400599,256614,40904,30549,27046,54603,56500,73662]},"NJK":{"insp":[179,164,140,180,231,199,217,211,176,135],"cj_sal":[66324,63203,63371,65392,65969,68333,67365,67964,64471,68349],"cj_inc":[2490,2840,2780,2460,2330,6010,4990,3120,2760,2760],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,24664,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[4665,6671,6474,7350,9483,4981,9377,6026,7772,5935],"pdi_cost":[0,50,0,0,50,150,150,0,50,0],"chr_cost":[2470,2640,2700,1780,2780,5470,3960,2080,1640,0],"pdi_rev":[0,1199,1199,1499,1499,3198,3998,0,1999,0],"chr_rev":[17289,15755,17144,13862,24738,25935,25136,23443,23346,11075]},"NPB":{"insp":[3026,2862,3252,3050,3238,3224,3339,3738,3423,2956],"cj_sal":[718240,724487,880140,1105263,1060178,1063339,1177331,1205720,1060040,1023111],"cj_inc":[81500,125825,159170,148980,175070,157940,169410,280200,187940,158850],"cj_night_inc":[0,0,0,0,0,0,0,0,1350,0],"cjm_sal":[120251,116632,117878,122935,117878,83244,165598,79853,40544,40544],"cjm_inc":[8192,17200,28808,10792,19872,17548,0,12880,0,24664],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[182030,59640,59640,62608,59640,60398,63749,0,0,0],"conv":[69275,139337,133730,132569,138710,135321,135542,125587,107548,90697],"pdi_cost":[3050,2850,4200,4200,3200,5250,4450,6200,4300,3300],"chr_cost":[63800,83140,130220,115790,140670,116110,127710,129730,118200,76800],"pdi_rev":[58723,64759,87380,79041,90111,173444,173735,243323,197721,213652],"chr_rev":[350923,388914,658575,563678,777176,644757,756187,846351,844178,683410]},"NRJ":{"insp":[4051,3863,4122,4202,4644,4313,3885,4395,4182,3448],"cj_sal":[410410,347632,483029,1011483,1124932,1189219,1154181,1079850,1078501,943454],"cj_inc":[49300,41110,107845,150570,131640,121770,121070,210820,170930,164070],"cj_night_inc":[0,0,0,0,0,0,0,0,23100,0],"cjm_sal":[0,0,0,38078,36437,38078,99329,37589,38667,37552],"cjm_inc":[0,0,1000,18167,2500,25500,4568,0,4976,4976],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[22907,22243,22243,23667,22243,22058,22770,0,0,0],"conv":[105420,153899,141670,167318,176628,164408,148558,128853,118154,102987],"pdi_cost":[7150,6400,6700,3400,8150,8000,6250,6650,5150,3950],"chr_cost":[79190,76210,73840,112880,85330,81190,99770,103370,80770,61590],"pdi_rev":[142745,135406,143306,76744,204641,231491,200214,244847,247863,202460],"chr_rev":[407766,395394,497299,487425,495509,501789,549210,722349,660530,513281]},"NUK":{"insp":[900,896,1027,1016,1093,977,852,869,846,692],"cj_sal":[315603,270333,293870,319989,280747,253825,272237,286493,265857,241416],"cj_inc":[34880,39430,43580,38430,42010,36350,26040,46580,47720,31720],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[40893,41414,41414,43254,0,43254,0,0,0,0],"cjm_inc":[1000,4856,1000,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[23016,28887,31970,31315,31076,28795,24674,21837,21902,18192],"pdi_cost":[1100,1550,900,2600,900,2400,800,1350,1350,450],"chr_cost":[20560,23740,26960,28150,26120,22380,21870,22820,26670,11110],"pdi_rev":[26524,28696,20263,28179,26342,75144,34242,60256,62259,59976],"chr_rev":[110844,108372,169595,130128,158489,126044,133145,139434,160489,128584]},"PUN":{"insp":[4267,4832,5236,5083,5343,5495,5653,5991,5485,4716],"cj_sal":[1072451,1144307,1178226,1965592,1943913,1796651,1738997,1720460,1733688,1537266],"cj_inc":[185810,141500,331260,292483,335190,305910,350000,450805,402410,370760],"cj_night_inc":[0,0,0,0,0,0,0,21300,22050,0],"cjm_sal":[114036,109353,43884,45708,92336,92375,90856,88361,94184,86529],"cjm_inc":[27441,21113,26760,47667,36760,61780,36784,67644,45004,45004],"cjm_night_inc":[0,0,0,0,0,0,0,8100,0,0],"tc_sal":[89543,86505,86498,86828,89433,89114,86153,89164,90676,92994],"conv":[138329,208104,225852,234083,223938,217053,222327,203829,198745,159999],"pdi_cost":[15650,2880,16650,14200,11050,16500,13950,14100,8850,8400],"chr_cost":[164100,132640,196110,168570,202600,196620,242400,257240,223540,154770],"pdi_rev":[292323,281417,332081,236523,259549,469682,432861,502894,347401,414975],"chr_rev":[844151,899026,1183792,1203650,1349149,1308474,1410620,1577990,1419657,1192862]},"SAP":{"insp":[969,866,1001,897,946,853,868,781,699,570],"cj_sal":[0,0,16385,145083,173836,190024,206024,213333,115095,174221],"cj_inc":[0,0,0,3020,2150,960,1230,33440,28490,28490],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,1800,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,1800,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[0,0,0,7537,17647,25421,25868,22647,22283,15765],"pdi_cost":[0,0,0,0,350,450,1000,1750,750,500],"chr_cost":[0,0,0,2670,1620,0,0,17320,18210,8590],"pdi_rev":[9139,13149,19477,6795,20274,29171,47662,80246,53549,64474],"chr_rev":[0,0,41218,14759,24344,21459,32246,113210,114220,98660]},"SKA":{"insp":[1115,1186,1255,1182,1159,1226,1097,1306,1036,1025],"cj_sal":[83345,181022,193951,215876,242400,297657,366572,267063,317258,324858],"cj_inc":[10700,15060,24490,53740,22285,20080,17530,40070,40550,40550],"cj_night_inc":[0,0,0,0,0,0,0,0,150,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[9859,26801,29016,37228,34866,35372,31234,28993,24431,24449],"pdi_cost":[450,600,700,300,550,950,1000,700,600,350],"chr_cost":[12960,15780,19920,50270,15730,22870,14310,31370,23380,10220],"pdi_rev":[20196,18611,22701,19685,19334,43222,42597,41484,53767,44559],"chr_rev":[60938,84812,172859,151232,96233,134387,119611,165916,141972,140983]},"SKL":{"insp":[2460,2482,2844,2642,2870,3040,2804,2751,2608,2036],"cj_sal":[1170383,1103979,1257839,1112568,1269113,1211243,1190386,1114288,1115252,1061410],"cj_inc":[105520,108940,88710,143800,87030,103120,87190,64120,46940,40890],"cj_night_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_sal":[43376,42697,42651,45833,44056,45833,41904,33936,36264,35452],"cjm_inc":[0,0,0,10050,125,0,3630,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[27912,26113,26997,26555,27439,27410,26555,26555,27410,27410],"conv":[142807,203639,220772,204485,194710,196952,178201,153687,156553,124159],"pdi_cost":[3500,3600,5550,2300,2800,3800,4400,2500,1900,900],"chr_cost":[61510,66330,49350,73500,62960,72970,64540,39030,24470,16830],"pdi_rev":[69953,86248,132596,126607,79011,146920,172210,328051,292659,247476],"chr_rev":[360912,381279,375088,365219,409610,446731,375608,360960,340799,236986]},"STN":{"insp":[2083,2020,2315,2170,2329,2159,2196,2307,1930,1626],"cj_sal":[534611,569864,628681,657656,777632,729617,630258,561409,534231,511580],"cj_inc":[42445,45150,60740,75120,54990,40290,49590,95020,29100,34520],"cj_night_inc":[0,0,0,0,0,0,0,0,1650,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[74587,104623,112612,112273,102525,92514,93700,88492,75496,59635],"pdi_cost":[700,350,600,1100,550,600,800,1300,350,250],"chr_cost":[47420,46970,41190,48840,47900,38860,46400,47750,18640,16290],"pdi_rev":[16692,15920,18691,23883,20846,31828,33129,74108,41913,76046],"chr_rev":[272450,270649,296223,270092,319716,290876,322140,374157,251891,198907]},"STS":{"insp":[5699,5910,6142,6068,6250,6709,6511,7273,6202,5502],"cj_sal":[1786778,1706790,1824918,1947425,1989597,2141498,2156695,2224260,1278245,2270208],"cj_inc":[219825,193550,236370,203430,243740,230620,248730,277810,204800,192370],"cj_night_inc":[0,0,0,0,0,0,0,0,13500,0],"cjm_sal":[116808,104227,113757,120480,107916,120460,107173,111408,114675,113852],"cjm_inc":[8060,5500,2500,10025,5825,500,0,2000,600,2400],"cjm_night_inc":[0,0,0,0,0,0,0,0,600,0],"tc_sal":[41196,40935,42795,46749,42796,37718,44184,40670,42076,23498],"conv":[179271,241719,241624,239291,234406,242951,218307,217759,188780,167182],"pdi_cost":[12250,9950,12050,5000,8850,13600,13750,16850,5150,6300],"chr_cost":[164760,123090,163100,128460,181990,156350,176390,208850,133560,125130],"pdi_rev":[259712,223986,264299,207444,268023,463113,514550,924411,474086,599697],"chr_rev":[995008,956227,1094608,1099573,1352314,1238781,1113416,1372307,1227337,1256703]},"UPE":{"insp":[3612,3506,4301,4141,4321,4631,4461,4728,4423,3877],"cj_sal":[959651,872700,937489,1428672,1662100,1683843,1908738,1356678,1535575,1435590],"cj_inc":[81220,69675,155160,140145,142040,170490,108875,200410,218430,204890],"cj_night_inc":[0,0,0,2700,9600,10800,900,0,3150,0],"cjm_sal":[41659,37716,39061,42177,86114,41748,40658,44006,45365,45365],"cjm_inc":[1000,1000,0,500,1200,0,0,0,72,0],"cjm_night_inc":[0,0,0,0,1200,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[149392,216269,222724,234854,217550,232329,204971,149776,137847,123315],"pdi_cost":[3600,2950,5650,3500,3100,6800,4650,4450,3500,1550],"chr_cost":[86010,92770,99680,134900,97330,120070,105490,121540,130020,64850],"pdi_rev":[70473,65585,114091,69947,92045,226761,177293,184912,169290,190713],"chr_rev":[468024,477884,548382,556805,570841,642134,668338,769540,873822,754079]},"UPW":{"insp":[2740,2619,2757,2793,2591,3157,2703,2563,2670,2526],"cj_sal":[601340,677083,700018,829970,851037,907642,890187,713835,757874,846988],"cj_inc":[64420,71945,84710,98750,88010,74110,83720,140520,115140,118210],"cj_night_inc":[0,0,0,0,0,0,0,0,150,0],"cjm_sal":[52838,53325,57003,57343,55164,57343,60501,0,0,0],"cjm_inc":[3437,0,0,0,0,0,0,0,0,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[0,0,0,0,0,0,0,0,0,0],"conv":[88382,128919,120866,67512,107928,133283,101355,75665,84092,88440],"pdi_cost":[1900,2050,1950,2800,1750,2600,2200,1400,2550,1150],"chr_cost":[60870,64030,69590,67790,64760,55670,53670,84780,74430,44950],"pdi_rev":[38794,36929,43217,37172,54775,88193,75185,51770,94976,112040],"chr_rev":[294765,319238,371747,320342,315935,339903,339938,460646,478126,432551]},"WMH":{"insp":[4266,4302,4619,4376,4529,4585,4508,4526,4433,3889],"cj_sal":[802464,783436,805116,853054,1008761,1047832,1125066,1109613,1244654,1163369],"cj_inc":[75530,82500,129355,113320,91810,83550,115610,184320,170350,155990],"cj_night_inc":[0,0,0,0,0,0,0,0,150,0],"cjm_sal":[0,0,0,0,0,0,0,0,0,0],"cjm_inc":[0,0,0,0,0,0,0,0,7168,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[62572,60954,60681,60537,63673,62287,59941,63489,57288,39460],"conv":[95355,141474,135744,127452,120994,129851,123247,111711,118195,98773],"pdi_cost":[4150,3700,4600,1100,2150,3150,2850,2000,2050,450],"chr_cost":[88830,82070,105660,93480,79680,69780,94690,93000,116200,56510],"pdi_rev":[95638,95360,114224,70847,96481,142994,132647,168788,134592,127034],"chr_rev":[457389,458955,723266,483281,490668,466028,571190,661547,827263,687255]},"WMP":{"insp":[3043,2947,2904,3134,3247,3161,3073,3799,3932,3429],"cj_sal":[876446,922754,997477,1040615,1083690,1070888,1112250,980504,1078348,1051138],"cj_inc":[131460,112370,129585,121270,124895,119730,115610,254370,270370,245890],"cj_night_inc":[0,0,0,0,0,0,0,0,150,0],"cjm_sal":[0,16528,45503,45833,46724,45833,0,0,0,0],"cjm_inc":[0,0,1000,3110,3500,0,0,0,28064,0],"cjm_night_inc":[0,0,0,0,0,0,0,0,0,0],"tc_sal":[26973,27003,27809,27809,29483,27809,29483,27839,29483,28646],"conv":[77689,107017,111618,128335,127521,120499,108733,106051,109395,100968],"pdi_cost":[3700,4300,4350,2400,3400,4150,3500,4900,5550,5300],"chr_cost":[82010,67350,80970,97460,101930,107620,84440,120930,157990,114360],"pdi_rev":[83715,81918,92749,91233,92777,133242,133361,198133,217501,266841],"chr_rev":[429204,402618,461146,476703,545089,534589,475465,745817,936256,882369]}};
+
+// ===== PROCESS CONFIG =====
+// Process filter defines which cost/revenue components are included in CoI calculation
+const PROC_CONFIG = {
+  All:  { label:'All Processes Combined', color:'#3245FF',
+          costs:['cj_sal','cj_inc','cjm_sal','cjm_inc','tc_sal','conv'],
+          revs:['pdi_rev','chr_rev'] },
+  HI:   { label:'HI – Home Inspection CJs only (excl. Growth & PDI team costs/rev)', color:'#8b5cf6',
+          costs:['cj_sal','cj_inc','cjm_sal','cjm_inc','conv'],
+          revs:['chr_rev'] },
+  Growth:{ label:'Growth – Growth CJ team (salary + incentive + conveyance)', color:'#10b981',
+          costs:['cj_sal','cj_inc','cjm_sal','cjm_inc','conv'],
+          revs:[] },
+  PDI:  { label:'PDI – PDI process only (PDI cost vs PDI revenue)', color:'#f59e0b',
+          costs:['pdi_cost','tc_sal'],
+          revs:['pdi_rev'] }
+};
+
+let PROC = 'All';
+const ZC = {NDL:'#ef4444',East:'#8b5cf6',West:'#f59e0b',South:'#10b981',RoN:'#06b6d4',NCR:'#ec4899'};
+const zc = z => ZC[z]||'#6b7280';
+const fmt = (n,d=0) => (n||0).toLocaleString('en-IN',{maximumFractionDigits:d});
+const fmtM = n => '₹'+(n/1e6).toFixed(2)+'M';
+const fmtK = n => n>=1000?(n/1000).toFixed(1)+'K':Math.round(n).toString();
+
+function setProcess(p){
+  PROC=p;
+  document.querySelectorAll('.proc-btn').forEach(b=>{
+    b.className='proc-btn';
+    if(b.textContent.includes(p)) b.classList.add('active-'+p);
+  });
+  document.getElementById('proc-desc').textContent = 'Showing: '+PROC_CONFIG[p].label;
+  renderDash(); renderRegion();
+}
+
+function calcCost(reg,mi){
+  const d=DATA[reg]; if(!d) return {tc:0,rev:0,insp:0};
+  const cfg=PROC_CONFIG[PROC];
+  const tc=cfg.costs.reduce((s,k)=>s+(d[k]?d[k][mi]:0),0);
+  const rev=cfg.revs.reduce((s,k)=>s+(d[k]?d[k][mi]:0),0);
+  return {tc,rev,insp:d.insp[mi]||0};
+}
+
+function getRegs(zone){
+  if(zone==='ALL') return Object.keys(DATA);
+  return Object.keys(DATA).filter(r=>RMETA[r]&&RMETA[r].zone===zone);
+}
+
+function aggZone(zone,mi){
+  let tc=0,rev=0,insp=0;
+  getRegs(zone).forEach(r=>{const c=calcCost(r,mi);tc+=c.tc;rev+=c.rev;insp+=c.insp;});
+  return {tc,rev,insp,gross:insp?tc/insp:0,net:insp?(tc-rev)/insp:0};
+}
+
+// ===== CHART STORE =====
+const CH={};
+function dch(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+
+// ===== PAGE NAVIGATION =====
+const PAGES=['dash','region','sim','insp','cj','cjm','tc','reimb','vas','rev'];
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.mtab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.mtab')[PAGES.indexOf(p)].classList.add('active');
+}
+
+// ===== INNER TAB SWITCH (v2) =====
+function switchITab2(pageId, panelId, el){
+  const pg=document.getElementById('page-'+pageId);
+  pg.querySelectorAll('.itab').forEach(t=>t.classList.remove('active'));
+  pg.querySelectorAll('.ipanel').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const panelEl=document.getElementById(panelId);
+  if(panelEl) panelEl.classList.add('active');
+}
+
+// ===== FILTER INPUT TABLE BY ZONE =====
+function filterInputTable(tblId, containerId){
+  const tbl=document.getElementById(tblId);
+  if(!tbl)return;
+  // Get checked zones from checkboxes
+  const checkboxes=document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`);
+  const selectedZones=Array.from(checkboxes).map(cb=>cb.value);
+  tbl.querySelectorAll('tbody tr').forEach(tr=>{
+    if(tr.classList.contains('tr'))return; // keep total row
+    if(selectedZones.length===0){tr.style.display='';return;} // show all if nothing selected
+    const zoneCell=tr.querySelector('td:first-child');
+    const rowZone=zoneCell?zoneCell.textContent.trim():'';
+    tr.style.display=selectedZones.includes(rowZone)?'':'none';
+  });
+}
+
+// ===== CLEAR INPUT TAB VALUES =====
+function clearInputTab2(dataKey){
+  if(!confirm('Zero out all values for "'+dataKey+'" across all regions?'))return;
+  Object.keys(DATA).forEach(r=>{if(DATA[r]&&DATA[r][dataKey])DATA[r][dataKey]=DATA[r][dataKey].map(()=>0);});
+  renderAllInputTables();
+  if(document.getElementById('page-dash').classList.contains('active'))renderDash();
+}
+
+// ===== CLEAR PAGE (current page only) =====
+function clearPage(page){
+  if(!confirm('Reset filters on this page?'))return;
+  if(page==='dash'){
+    document.getElementById('d-zone').value='ALL';
+    document.getElementById('d-month').value='9';
+    document.getElementById('d-coi').value='net';
+    renderDash();
+  } else if(page==='region'){
+    document.getElementById('r-zone').value='ALL';
+    document.getElementById('r-sort').value='coi_asc';
+    renderRegion();
+  } else if(page==='sim'){
+    document.getElementById('si-insp').value=5000;
+    ['si-cjsal','si-cjinc','si-cjmsal','si-cjminc','si-tcsal','si-conv','si-pdir','si-chrr'].forEach(id=>{document.getElementById(id).value=0;});
+    calcSim();
+  }
+}
+
+// ===== DASHBOARD =====
+function handleDashZone(checkbox){
+  const allCheck=document.querySelector('#dash-zone-filter input[value="ALL"]');
+  const zoneChecks=document.querySelectorAll('#dash-zone-filter input[type="checkbox"]:not([value="ALL"])');
+  
+  if(checkbox.value==='ALL'){
+    // If "All India" is checked, uncheck all zones
+    if(checkbox.checked){
+      zoneChecks.forEach(cb=>cb.checked=false);
+    }
+  } else {
+    // If any zone is checked, uncheck "All India"
+    if(checkbox.checked){
+      allCheck.checked=false;
+    }
+    // If all zones are unchecked, check "All India"
+    const anyChecked=Array.from(zoneChecks).some(cb=>cb.checked);
+    if(!anyChecked){
+      allCheck.checked=true;
+    }
+  }
+  renderDash();
+}
+
+function getSelectedDashZones(){
+  const allCheck=document.querySelector('#dash-zone-filter input[value="ALL"]');
+  if(allCheck&&allCheck.checked)return ['ALL'];
+  const checked=document.querySelectorAll('#dash-zone-filter input[type="checkbox"]:checked');
+  return Array.from(checked).map(cb=>cb.value);
+}
+
+function renderDash(){
+  const zones=getSelectedDashZones();
+  const mi=parseInt(document.getElementById('d-month').value);
+  const ctype=document.getElementById('d-coi').value;
+  
+  // Get regions for selected zones
+  let regs=[];
+  if(zones.includes('ALL')){
+    regs=getRegs('ALL');
+  } else {
+    zones.forEach(z=>{
+      regs=regs.concat(getRegs(z));
+    });
+    regs=[...new Set(regs)]; // Remove duplicates
+  }
+  
+  const cfg=PROC_CONFIG[PROC];
+
+  // Aggregate
+  let tc=0,rev=0,insp=0;
+  let bcs={cj_sal:0,cj_inc:0,cjm_sal:0,cjm_inc:0,tc_sal:0,conv:0};
+  regs.forEach(r=>{
+    const c=calcCost(r,mi);tc+=c.tc;rev+=c.rev;insp+=c.insp;
+    const d=DATA[r];if(!d)return;
+    cfg.costs.forEach(k=>{if(bcs[k]!==undefined)bcs[k]+=(d[k]?d[k][mi]:0);});
+  });
+  const gross=insp?tc/insp:0,net=insp?(tc-rev)/insp:0;
+  const coi=ctype==='net'?net:gross;
+
+  // Prev month delta
+  let tcp=0,revp=0,inspp=0;
+  const mip=mi>0?mi-1:0;
+  regs.forEach(r=>{const c=calcCost(r,mip);tcp+=c.tc;revp+=c.rev;inspp+=c.insp;});
+  const coip=ctype==='net'?(inspp?(tcp-revp)/inspp:0):(inspp?tcp/inspp:0);
+  const idelta=inspp?((insp-inspp)/inspp*100).toFixed(1):0;
+  const cdelta=coip?((coi-coip)/Math.abs(coip)*100).toFixed(1):0;
+
+  // Process info bar
+  document.getElementById('d-proc-info').innerHTML=`
+    <div class="pib"><div class="pdot" style="background:${cfg.color}"></div><b>Process: ${PROC}</b> — ${cfg.label}</div>
+    <div class="pib"><div class="pdot" style="background:#6b7a99"></div>Costs: ${cfg.costs.join(', ')}</div>
+    <div class="pib"><div class="pdot" style="background:#10b981"></div>Revenue: ${cfg.revs.length?cfg.revs.join(', '):'None'}</div>`;
+
+  document.getElementById('d-trend-lbl').textContent=PROC+' – '+(zones.includes('ALL')?'All India':zones.join(', '));
+  document.getElementById('d-mb').textContent=MONTHS[mi];
+
+  // KPIs
+  document.getElementById('d-kpi').innerHTML=`
+    <div class="kc"><div class="kl">Total Inspections</div><div class="kv">${fmt(insp)}</div><div class="ks">${MONTHS[mi]}</div><span class="kbadge ${parseFloat(idelta)>=0?'up':'dn'}">${parseFloat(idelta)>=0?'▲':'▼'} ${Math.abs(idelta)}% MoM</span></div>
+    <div class="kc ${coi<200?'g':coi<350?'o':'r'}"><div class="kl">CoI (${ctype==='net'?'Net':'Gross'})</div><div class="kv">₹${fmt(coi,0)}</div><div class="ks">${PROC} Process</div><span class="kbadge ${parseFloat(cdelta)<=0?'up':'dn'}">${parseFloat(cdelta)<=0?'▲ Better':'▼ Worse'} ${Math.abs(cdelta)}%</span></div>
+    <div class="kc o"><div class="kl">Total Cost</div><div class="kv">${fmtM(tc)}</div><div class="ks">Selected components</div></div>
+    <div class="kc g"><div class="kl">Total Revenue</div><div class="kv">${fmtM(rev)}</div><div class="ks">${cfg.revs.join('+')||'N/A'}</div></div>
+    <div class="kc c"><div class="kl">Gross CoI</div><div class="kv">₹${fmt(gross,0)}</div><div class="ks">Excl. Revenue</div></div>
+    <div class="kc v"><div class="kl">Net CoI</div><div class="kv">₹${fmt(net,0)}</div><div class="ks">Incl. Revenue offset</div></div>`;
+
+  // Trend charts
+  const trendCoi=MONTHS.map((_,i)=>{let t=0,rv=0,ins=0;regs.forEach(r=>{const c=calcCost(r,i);t+=c.tc;rv+=c.rev;ins+=c.insp;});return ctype==='net'?(ins?(t-rv)/ins:0):(ins?t/ins:0);});
+  const trendInsp=MONTHS.map((_,i)=>{let s=0;regs.forEach(r=>{const d=DATA[r];if(d)s+=d.insp[i]||0;});return s;});
+  dch('trend');CH['trend']=new Chart(document.getElementById('c-trend'),{type:'line',data:{labels:MONTHS,datasets:[{label:'CoI',data:trendCoi,borderColor:cfg.color,backgroundColor:cfg.color+'20',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+fmt(v)}}}}});
+  dch('insp');CH['insp']=new Chart(document.getElementById('c-insp'),{type:'bar',data:{labels:MONTHS,datasets:[{data:trendInsp,backgroundColor:'rgba(0,196,204,.7)',borderColor:'#00c4cc',borderWidth:1}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>fmtK(v)}}}}});
+
+  // Cost breakdown
+  const bkeys=['cj_sal','cj_inc','cjm_sal','cjm_inc','tc_sal','conv'];
+  const blabels=['CJ Sal','CJ Inc','CJM Sal','CJM Inc','TC Sal','Conv'];
+  const bcolors=['#3245FF','#6366f1','#10b981','#34d399','#f59e0b','#f97316'];
+  const bvals=bkeys.map(k=>bcs[k]/1e6);
+  dch('break');CH['break']=new Chart(document.getElementById('c-break'),{type:'bar',data:{labels:blabels,datasets:[{data:bvals,backgroundColor:bcolors}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v.toFixed(1)+'M'}}}}});
+
+  // Zone CoI
+  const zoneList=zones.includes('ALL')?['NDL','East','West','South','RoN']:zones;
+  const zCois=zoneList.map(z=>{const a=aggZone(z,mi);return ctype==='net'?a.net:a.gross;});
+  dch('zone');CH['zone']=new Chart(document.getElementById('c-zone'),{type:'bar',data:{labels:zoneList,datasets:[{data:zCois,backgroundColor:zoneList.map(z=>zc(z)+'cc')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+fmt(v)}}}}});
+
+  // Region CoI
+  const rd=regs.map(r=>{const c=calcCost(r,mi);const coi2=c.insp?(ctype==='net'?(c.tc-c.rev)/c.insp:c.tc/c.insp):0;return{r,coi:coi2};}).filter(x=>x.coi!==0).sort((a,b)=>a.coi-b.coi);
+  dch('reg');CH['reg']=new Chart(document.getElementById('c-reg'),{type:'bar',data:{labels:rd.map(x=>x.r),datasets:[{data:rd.map(x=>x.coi),backgroundColor:rd.map(x=>zc(RMETA[x.r]?.zone||'')+'bb')}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+fmt(v)}}}}});
+
+  // Table
+  buildDashTable(regs,ctype);
+}
+
+function buildDashTable(regs,ctype){
+  const grouped={};
+  regs.forEach(r=>{const z=RMETA[r]?.zone||'Other';if(!grouped[z])grouped[z]=[];grouped[z].push(r);});
+  let h=`<table><thead><tr><th>Zone</th><th>Region</th><th>FFH</th>${MONTHS.map(m=>`<th>${m}<br><small>Insp</small></th><th>${m}<br><small>CoI</small></th>`).join('')}</tr></thead><tbody>`;
+  // Grand total
+  const gt=MONTHS.map((_,i)=>{let tc=0,rev=0,ins=0;regs.forEach(r=>{const c=calcCost(r,i);tc+=c.tc;rev+=c.rev;ins+=c.insp;});const coi=ins?(ctype==='net'?(tc-rev)/ins:tc/ins):0;return{ins,coi};});
+  h+=`<tr class="tr"><td colspan="3">🌐 ALL INDIA</td>${gt.map(x=>`<td>${fmt(x.ins)}</td><td>₹${fmt(x.coi,0)}</td>`).join('')}</tr>`;
+  Object.entries(grouped).forEach(([zone,zr])=>{
+    const zt=MONTHS.map((_,i)=>{let tc=0,rev=0,ins=0;zr.forEach(r=>{const c=calcCost(r,i);tc+=c.tc;rev+=c.rev;ins+=c.insp;});const coi=ins?(ctype==='net'?(tc-rev)/ins:tc/ins):0;return{ins,coi};});
+    h+=`<tr class="zr" style="border-left:4px solid ${zc(zone)}"><td colspan="3">📍 ${zone}</td>${zt.map(x=>`<td><b>${fmt(x.ins)}</b></td><td style="color:${x.coi<200?'var(--gr)':x.coi<350?'var(--or)':'var(--rd)'};font-weight:700">₹${fmt(x.coi,0)}</td>`).join('')}</tr>`;
+    zr.sort((a,b)=>a.localeCompare(b)).forEach(r=>{
+      const meta=RMETA[r]||{};
+      const row=MONTHS.map((_,i)=>{const c=calcCost(r,i);const coi=c.insp?(ctype==='net'?(c.tc-c.rev)/c.insp:c.tc/c.insp):0;return{ins:c.insp,coi};});
+      h+=`<tr><td style="color:${zc(zone)};font-size:9.5px">${zone}</td><td>${r} <span class="${meta.tier==='TIER1'?'b1':'b2'}">${meta.tier||''}</span></td><td style="font-size:9.5px;color:var(--mu)">${meta.ffh||''}</td>${row.map(x=>`<td>${x.ins?fmt(x.ins):'-'}</td><td class="${x.coi<200?'cg':x.coi<350?'cw':'cr'}">${x.coi?'₹'+fmt(x.coi,0):'-'}</td>`).join('')}</tr>`;
+    });
+  });
+  h+='</tbody></table>';
+  document.getElementById('d-table').innerHTML=h;
+}
+
+// ===== REGION PAGE =====
+function renderRegion(){
+  const zone=document.getElementById('r-zone').value;
+  const sort=document.getElementById('r-sort').value;
+  const mi=9;
+  const cfg=PROC_CONFIG[PROC];
+  let regs=getRegs(zone==='ALL'?'ALL':zone).map(r=>{
+    const c=calcCost(r,mi);
+    const coi=c.insp?(c.tc-c.rev)/c.insp:0;
+    const gross=c.insp?c.tc/c.insp:0;
+    return{r,coi,gross,insp:c.insp,tc:c.tc,rev:c.rev};
+  });
+  if(sort==='coi_asc')regs.sort((a,b)=>a.coi-b.coi);
+  else if(sort==='coi_desc')regs.sort((a,b)=>b.coi-a.coi);
+  else if(sort==='insp_desc')regs.sort((a,b)=>b.insp-a.insp);
+  else regs.sort((a,b)=>a.r.localeCompare(b.r));
+  const zmap={NDL:'ndl',East:'east',West:'west',South:'south',RoN:'ron',NCR:'ndl'};
+  document.getElementById('r-grid').innerHTML=regs.filter(x=>x.insp>0).map(({r,coi,gross,insp,tc,rev})=>{
+    const meta=RMETA[r]||{};
+    const zc2=zmap[meta.zone]||'';
+    const last5=[5,6,7,8,9].map(i=>DATA[r]?.insp[i]||0);
+    const mx=Math.max(...last5,1);
+    const sp=last5.map((v,j)=>`<rect x="${j*18}" y="${30-v/mx*28}" width="14" height="${v/mx*28}" fill="${zc(meta.zone)}88" rx="2"/>`).join('');
+    return `<div class="rcard ${zc2}">
+      <div class="rch"><div><div class="rcn">${r}</div><div class="rcz">${meta.zone} · ${meta.ffh||''} · <span class="${meta.tier==='TIER1'?'b1':'b2'}">${meta.tier||''}</span></div></div><svg width="90" height="32">${sp}</svg></div>
+      <div class="rcm">
+        <div class="rci"><div class="rcil">Insp</div><div class="rciv" style="color:var(--p)">${fmt(insp)}</div></div>
+        <div class="rci"><div class="rcil">Net CoI</div><div class="rciv" style="color:${coi<200?'var(--gr)':coi<350?'var(--or)':'var(--rd)'}">₹${fmt(coi,0)}</div></div>
+        <div class="rci"><div class="rcil">Gross CoI</div><div class="rciv" style="color:var(--mu)">₹${fmt(gross,0)}</div></div>
+        <div class="rci"><div class="rcil">Cost (${PROC})</div><div class="rciv" style="font-size:10px">${fmtM(tc)}</div></div>
+        <div class="rci"><div class="rcil">Revenue</div><div class="rciv" style="color:var(--gr);font-size:10px">${fmtM(rev)}</div></div>
+        <div class="rci"><div class="rcil">Net Cost</div><div class="rciv" style="color:${tc-rev>0?'var(--rd)':'var(--gr)'};font-size:10px">${fmtM(tc-rev)}</div></div>
+      </div></div>`;
+  }).join('');
+}
+
+// ===== SIMULATION =====
+let simMode='manual',sPie=null,sComp=null;
+function setSimMode(m){
+  simMode=m;
+  document.getElementById('sm-m').classList.toggle('active',m==='manual');
+  document.getElementById('sm-s').classList.toggle('active',m==='semi');
+  document.getElementById('s-snote').style.display=m==='semi'?'block':'none';
+  document.querySelectorAll('.sf').forEach(el=>{el.classList.toggle('synced',m==='semi');el.readOnly=m==='semi';});
+  if(m==='semi')syncSim();calcSim();
+}
+function syncSim(){
+  const reg=document.getElementById('s-reg').value;
+  const mi=parseInt(document.getElementById('s-mo').value);
+  if(!reg||!DATA[reg])return;
+  const d=DATA[reg];
+  document.getElementById('si-insp').value=Math.round(d.insp[mi]);
+  if(simMode==='semi'){
+    document.getElementById('si-cjsal').value=Math.round(d.cj_sal[mi]);
+    document.getElementById('si-cjinc').value=Math.round(d.cj_inc[mi]);
+    document.getElementById('si-cjmsal').value=Math.round(d.cjm_sal[mi]);
+    document.getElementById('si-cjminc').value=Math.round(d.cjm_inc[mi]);
+    document.getElementById('si-tcsal').value=Math.round(d.tc_sal[mi]);
+    document.getElementById('si-conv').value=Math.round(d.conv[mi]);
+    document.getElementById('si-pdir').value=Math.round(d.pdi_rev[mi]);
+    document.getElementById('si-chrr').value=Math.round(d.chr_rev[mi]);
+  }
+  calcSim();
+}
+function calcSim(){
+  const g=id=>parseFloat(document.getElementById(id).value)||0;
+  const insp=g('si-insp'),cjsal=g('si-cjsal'),cjinc=g('si-cjinc');
+  const cjmsal=g('si-cjmsal'),cjminc=g('si-cjminc'),tcsal=g('si-tcsal'),conv=g('si-conv');
+  const pdir=g('si-pdir'),chrr=g('si-chrr');
+  const tc=cjsal+cjinc+cjmsal+cjminc+tcsal+conv;
+  const rev=pdir+chrr;
+  const gross=insp?tc/insp:0,net=insp?(tc-rev)/insp:0;
+  document.getElementById('s-coi').textContent='₹'+fmt(net,0);
+  document.getElementById('s-gross').textContent='Gross CoI: ₹'+fmt(gross,0);
+  const pc=v=>tc?(v/tc*100).toFixed(1)+'%':'-';
+  document.getElementById('s-bdown').innerHTML=`
+    <div class="sbi"><div class="sbl">Total Cost</div><div class="sbv">${fmtM(tc)}</div></div>
+    <div class="sbi"><div class="sbl">Total Revenue</div><div class="sbv">${fmtM(rev)}</div></div>
+    <div class="sbi"><div class="sbl">Net Cost</div><div class="sbv">${fmtM(tc-rev)}</div></div>
+    <div class="sbi"><div class="sbl">CJ Total %</div><div class="sbv">${pc(cjsal+cjinc)}</div></div>
+    <div class="sbi"><div class="sbl">CJM+TC %</div><div class="sbv">${pc(cjmsal+cjminc+tcsal)}</div></div>
+    <div class="sbi"><div class="sbl">Inspections</div><div class="sbv">${fmt(insp)}</div></div>`;
+  if(sPie)sPie.destroy();
+  sPie=new Chart(document.getElementById('c-spie'),{type:'doughnut',data:{labels:['CJ Sal','CJ Inc','CJM Sal','CJM Inc','TC Sal','Conv'],datasets:[{data:[cjsal,cjinc,cjmsal,cjminc,tcsal,conv],backgroundColor:['#3245FF','#6366f1','#10b981','#34d399','#f59e0b','#f97316']}]},options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:9}}}}}});
+  const reg=document.getElementById('s-reg').value;
+  const mi=parseInt(document.getElementById('s-mo').value);
+  let actCoi=0;
+  if(reg&&DATA[reg]){const c=calcCost(reg,mi);actCoi=c.insp?(c.tc-c.rev)/c.insp:0;}
+  if(sComp)sComp.destroy();
+  sComp=new Chart(document.getElementById('c-scomp'),{type:'bar',data:{labels:['Sim Net CoI','Sim Gross CoI',reg?`${reg} Actual ${MONTHS[mi]}`:'Actual'],datasets:[{data:[net,gross,actCoi],backgroundColor:['#3245FF88','#6366f188','#10b98188'],borderColor:['#3245FF','#6366f1','#10b981'],borderWidth:2}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+fmt(v)}}}}});
+}
+
+// ===== EDITABLE INPUT TABLE =====
+function buildEditTable(containerId, dataKey){
+  const allRegs=Object.keys(RMETA).filter(r=>DATA[r]);
+  let h=`<table><thead><tr><th>Zone</th><th>Region</th><th>FFH</th>${MS.map((m,i)=>`<th>${MONTHS[i]}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+  // Totals
+  const tots=MONTHS.map((_,i)=>{let s=0;allRegs.forEach(r=>{const d=DATA[r];if(d&&d[dataKey])s+=d[dataKey][i]||0;});return s;});
+  h+=`<tr class="tr"><td colspan="3">TOTAL</td>${tots.map(v=>`<td>₹${fmtK(v)}</td>`).join('')}<td>₹${fmtK(tots.reduce((a,b)=>a+b,0))}</td></tr>`;
+  allRegs.forEach(r=>{
+    const meta=RMETA[r]||{};const d=DATA[r];if(!d||!d[dataKey])return;
+    h+=`<tr data-reg="${r}" data-key="${dataKey}"><td style="color:${zc(meta.zone)};font-size:9px">${meta.zone}</td><td>${r}</td><td style="font-size:9px;color:var(--mu)">${meta.ffh||''}</td>`;
+    d[dataKey].forEach((v,i)=>{
+      h+=`<td class="ec"><input type="number" value="${Math.round(v||0)}" data-idx="${i}" onchange="upd('${r}','${dataKey}',${i},this.value)" onfocus="this.style.borderColor='var(--a)';this.style.background='#f0f7ff'" onblur="this.style.borderColor='transparent';this.style.background='transparent'"></td>`;
+    });
+    h+=`<td style="font-weight:700">₹${fmtK(d[dataKey].reduce((a,b)=>a+(b||0),0))}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById(containerId).innerHTML=h;
+}
+
+function upd(reg,key,idx,val){
+  if(!DATA[reg])return;
+  DATA[reg][key][idx]=parseFloat(val)||0;
+  if(document.getElementById('page-dash').classList.contains('active'))renderDash();
+}
+
+// ===== CSV IMPORT =====
+function buildImportUI(containerId, dataKey, label){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  el.innerHTML=`
+  <div class="import-box">
+    <div class="import-title">📥 Import ${label} Data via CSV</div>
+    <div class="drop-zone" id="dz-${containerId}" onclick="document.getElementById('fi-${containerId}').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event,'${containerId}','${dataKey}')">
+      <div class="dz-icon">📂</div>
+      <div class="dz-text">Click or Drag & Drop CSV File</div>
+      <div class="dz-sub">Format: Region, MAY, JUN, JUL, AUG, SEP, OCT, NOV, DEC, JAN26, FEB26</div>
+    </div>
+    <input type="file" id="fi-${containerId}" accept=".csv" style="display:none" onchange="handleFile(event,'${containerId}','${dataKey}')">
+    <div class="import-row">
+      <div class="import-col">
+        <label>Select Target Data Type</label>
+        <select id="dt-${containerId}"><option value="${dataKey}">${label}</option></select>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;">
+        <button class="btn btn-p" onclick="document.getElementById('fi-${containerId}').click()">📂 Browse CSV</button>
+        <button class="btn btn-o" onclick="downloadTemplate('${dataKey}','${label}')">⬇ Download Template</button>
+      </div>
+    </div>
+    <div id="is-${containerId}" class="import-status"></div>
+    <div id="preview-${containerId}" style="margin-top:12px;overflow-x:auto;"></div>
+  </div>`;
+}
+
+function handleDrop(e,cid,key){
+  e.preventDefault();
+  document.getElementById('dz-'+cid).classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file)processCSV(file,cid,key);
+}
+function handleFile(e,cid,key){
+  const file=e.target.files[0];
+  if(file)processCSV(file,cid,key);
+}
+
+function processCSV(file,cid,key){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const lines=ev.target.result.split('\n').map(l=>l.trim()).filter(l=>l);
+      let imported=0,skipped=0;
+      const preview=[];
+      lines.forEach((line,li)=>{
+        if(li===0&&isNaN(parseFloat(line.split(',')[1])))return; // skip header
+        const cols=line.split(',').map(c=>c.trim());
+        const reg=cols[0].toUpperCase();
+        if(!DATA[reg]){skipped++;return;}
+        const vals=cols.slice(1,11).map(v=>parseFloat(v)||0);
+        DATA[reg][key]=vals.concat(new Array(10-vals.length).fill(0)).slice(0,10);
+        imported++;
+        preview.push(`<tr><td>${reg}</td>${vals.map(v=>`<td>₹${fmtK(v)}</td>`).join('')}</tr>`);
+      });
+      document.getElementById('is-'+cid).className='import-status ok';
+      document.getElementById('is-'+cid).textContent=`✅ Imported ${imported} regions. Skipped ${skipped}.`;
+      document.getElementById('preview-'+cid).innerHTML=preview.length?`<table><thead><tr><th>Region</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}</tr></thead><tbody>${preview.join('')}</tbody></table>`:'';
+      if(document.getElementById('page-dash').classList.contains('active'))renderDash();
+      renderAllInputTables();
+    }catch(err){
+      document.getElementById('is-'+cid).className='import-status err';
+      document.getElementById('is-'+cid).textContent='❌ Error: '+err.message;
+    }
+  };
+  reader.readAsText(file);
+}
+
+function downloadTemplate(key,label){
+  const regs=Object.keys(RMETA).filter(r=>DATA[r]);
+  let csv='Region,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC,JAN26,FEB26\n';
+  regs.forEach(r=>{const d=DATA[r];csv+=r+','+(d[key]||Array(10).fill(0)).map(v=>Math.round(v||0)).join(',')+'\n';});
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`template_${key}_${label}.csv`;a.click();
+}
+
+function renderAllInputTables(){
+  buildEditTable('insp-tbl','insp');
+  buildEditTable('cj-sal-tbl','cj_sal');
+  buildEditTable('cj-inc-tbl','cj_inc');
+  buildEditTable('cjm-sal-tbl','cjm_sal');
+  buildEditTable('cjm-inc-tbl','cjm_inc');
+  buildEditTable('tc-sal-tbl','tc_sal');
+  buildEditTable('reimb-tbl','conv');
+  buildEditTable('vas-pdi-tbl','pdi_cost');
+  buildEditTable('vas-chr-tbl','chr_cost');
+  buildEditTable('rev-pdi-tbl','pdi_rev');
+  buildEditTable('rev-chr-tbl','chr_rev');
+}
+
+function buildAllImportUIs(){
+  // INSP
+  buildImportUI('insp-imp-ui','insp','Inspections');
+  // CJ — one import UI per sub-tab
+  buildImportUI('cj-sal-imp-ui','cj_sal','CJ Salary');
+  buildImportUI('cj-inc-imp-ui','cj_inc','CJ Incentive');
+  // CJM
+  buildImportUI('cjm-sal-imp-ui','cjm_sal','CJM Salary');
+  buildImportUI('cjm-inc-imp-ui','cjm_inc','CJM Incentive');
+  // TC
+  buildImportUI('tc-sal-imp-ui','tc_sal','TC Salary');
+  // REIMB
+  buildImportUI('reimb-imp-ui','conv','Conveyance / REIMB');
+  // VAS — one per sub-tab
+  buildImportUI('vas-pdi-imp-ui','pdi_cost','PDI Cost');
+  buildImportUI('vas-chr-imp-ui','chr_cost','CHR Cost');
+  // REV — one per sub-tab
+  buildImportUI('rev-pdi-imp-ui','pdi_rev','PDI Revenue');
+  buildImportUI('rev-chr-imp-ui','chr_rev','CHR Revenue');
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded',()=>{
+  // Sim region dropdown
+  const sel=document.getElementById('s-reg');
+  Object.keys(DATA).sort().forEach(r=>{
+    const o=document.createElement('option');
+    o.value=r;o.textContent=r+' ('+( RMETA[r]?.zone||'')+')';
+    sel.appendChild(o);
+  });
+  renderDash();
+  renderRegion();
+  calcSim();
+  renderAllInputTables();
+  buildAllImportUIs();
+});
+</script>
+</body>
+</html>

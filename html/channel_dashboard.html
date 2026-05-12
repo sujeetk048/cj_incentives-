@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Performance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .filters {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9em;
+        }
+        .filter-group select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            min-width: 200px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .filter-group select:hover {
+            border-color: #667eea;
+        }
+        .filter-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .metric-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .metric-card h3 {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+        .metric-card .value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        .chart-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chart-box h2 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            text-align: center;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .data-table {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.9em;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8em;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+        }
+        tr:hover {
+            background: #f0f0f0;
+        }
+        .reset-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .reset-btn:hover {
+            transform: scale(1.05);
+        }
+        @media (max-width: 900px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Channel Performance Dashboard</h1>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="monthFilter">Select Month</label>
+                <select id="monthFilter" onchange="updateDashboard()">
+                    <option value="All">All Months</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="channelFilter">Select Channel</label>
+                <select id="channelFilter" onchange="updateDashboard()">
+                    <option value="All">All Channels</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="reset-btn" onclick="resetFilters()">Reset Filters</button>
+            </div>
+        </div>
+
+        <div class="metric-cards">
+            <div class="metric-card">
+                <h3>Total SI</h3>
+                <div class="value" id="totalSI">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>Total INSP</h3>
+                <div class="value" id="totalINSP">0</div>
+            </div>
+            <div class="metric-card">
+                <h3>SI Ratio</h3>
+                <div class="value" id="siRatio">0%</div>
+            </div>
+            <div class="metric-card">
+                <h3>Channels</h3>
+                <div class="value" id="channelCount">0</div>
+            </div>
+        </div>
+
+        <div class="charts-container">
+            <div class="chart-box">
+                <h2>📈 SI by Channel</h2>
+                <canvas id="siChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h2>📊 INSP by Channel</h2>
+                <canvas id="inspChart"></canvas>
+            </div>
+            <div class="chart-box full-width">
+                <h2>🔍 SI vs INSP Comparison</h2>
+                <canvas id="comparisonChart"></canvas>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <h2 style="margin-bottom: 15px; color: #555;">📋 Detailed Data</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Channel</th>
+                        <th>SI</th>
+                        <th>INSP</th>
+                        <th>SI %</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const rawData = [
+            {month: "Jan'26", channel: "GOOGLE_PERF", si: 1450, insp: 11965},
+            {month: "Jan'26", channel: "DSA", si: 138, insp: 1715},
+            {month: "Jan'26", channel: "ALLIANCES", si: 204, insp: 1773},
+            {month: "Jan'26", channel: "WALKIN", si: 2, insp: 64},
+            {month: "Jan'26", channel: "GROWTH", si: 1091, insp: 8608},
+            {month: "Jan'26", channel: "CC_BUYER", si: 0, insp: 1},
+            {month: "Jan'26", channel: "CRITEO", si: 47, insp: 541},
+            {month: "Jan'26", channel: "CLASSIFIED", si: 515, insp: 8827},
+            {month: "Jan'26", channel: "TABOOLA", si: 2, insp: 11},
+            {month: "Jan'26", channel: "AI", si: 2, insp: 7},
+            {month: "Jan'26", channel: "", si: 81, insp: 3840},
+            {month: "Jan'26", channel: "CRM", si: 180, insp: 1444},
+            {month: "Jan'26", channel: "BOD", si: 4602, insp: 39249},
+            {month: "Jan'26", channel: "FB_PERF", si: 311, insp: 3379},
+            {month: "Jan'26", channel: "BRANCH_BUYER", si: 32, insp: 302},
+            {month: "Jan'26", channel: "OTHERS", si: 50, insp: 669},
+            {month: "Jan'26", channel: "AFFILIATES", si: 756, insp: 12519},
+            {month: "Jan'26", channel: "PROJECT_AADHAAR", si: 637, insp: 6311},
+            {month: "Jan'26", channel: "TWITTER_PERF", si: 1, insp: 6},
+            {month: "Jan'26", channel: "SNAPCHAT_PERF", si: 6, insp: 59},
+            {month: "Jan'26", channel: "CC_SELLER", si: 694, insp: 5761},
+            {month: "Jan'26", channel: "MSITE", si: 5, insp: 33},
+            {month: "Feb'26", channel: "WALKIN", si: 6, insp: 45},
+            {month: "Feb'26", channel: "MSITE", si: 5, insp: 23},
+            {month: "Feb'26", channel: "CC_BUYER", si: 1, insp: 1},
+            {month: "Feb'26", channel: "DSA", si: 129, insp: 1549},
+            {month: "Feb'26", channel: "TWITTER_PERF", si: 1, insp: 2},
+            {month: "Feb'26", channel: "TABOOLA", si: 0, insp: 1},
+            {month: "Feb'26", channel: "AI", si: 1, insp: 8},
+            {month: "Feb'26", channel: "", si: 100, insp: 3376},
+            {month: "Feb'26", channel: "SNAPCHAT_PERF", si: 7, insp: 58},
+            {month: "Feb'26", channel: "GOOGLE_PERF", si: 1399, insp: 10915},
+            {month: "Feb'26", channel: "AFFILIATES", si: 748, insp: 11793},
+            {month: "Feb'26", channel: "CC_SELLER", si: 760, insp: 5268},
+            {month: "Feb'26", channel: "CLASSIFIED", si: 302, insp: 5112},
+            {month: "Feb'26", channel: "FB_PERF", si: 324, insp: 3231},
+            {month: "Feb'26", channel: "OTHERS", si: 70, insp: 727},
+            {month: "Feb'26", channel: "CRM", si: 211, insp: 1597},
+            {month: "Feb'26", channel: "BRANCH_BUYER", si: 23, insp: 131},
+            {month: "Feb'26", channel: "BOD", si: 4531, insp: 34273},
+            {month: "Feb'26", channel: "PROJECT_AADHAAR", si: 612, insp: 5355},
+            {month: "Feb'26", channel: "GROWTH", si: 1120, insp: 7337},
+            {month: "Feb'26", channel: "ALLIANCES", si: 146, insp: 1473},
+            {month: "Feb'26", channel: "CRITEO", si: 54, insp: 618},
+            {month: "Mar'26", channel: "CRM", si: 201, insp: 2099},
+            {month: "Mar'26", channel: "GROWTH", si: 1215, insp: 8040},
+            {month: "Mar'26", channel: "", si: 131, insp: 4334},
+            {month: "Mar'26", channel: "PROJECT_AADHAAR", si: 856, insp: 8805},
+            {month: "Mar'26", channel: "DSA", si: 112, insp: 1447},
+            {month: "Mar'26", channel: "TABOOLA", si: 4, insp: 4},
+            {month: "Mar'26", channel: "CC_BUYER", si: 0, insp: 2},
+            {month: "Mar'26", channel: "OTHERS", si: 58, insp: 623},
+            {month: "Mar'26", channel: "AFFILIATES", si: 828, insp: 13872},
+            {month: "Mar'26", channel: "CRITEO", si: 84, insp: 738},
+            {month: "Mar'26", channel: "CC_SELLER", si: 714, insp: 5660},
+            {month: "Mar'26", channel: "MSITE", si: 6, insp: 27},
+            {month: "Mar'26", channel: "TWITTER_PERF", si: 0, insp: 1},
+            {month: "Mar'26", channel: "FB_PERF", si: 331, insp: 3303},
+            {month: "Mar'26", channel: "AI", si: 0, insp: 9},
+            {month: "Mar'26", channel: "CLASSIFIED", si: 356, insp: 6306},
+            {month: "Mar'26", channel: "BOD", si: 4479, insp: 35308},
+            {month: "Mar'26", channel: "GOOGLE_PERF", si: 1766, insp: 14303},
+            {month: "Mar'26", channel: "ALLIANCES", si: 161, insp: 1626},
+            {month: "Mar'26", channel: "SNAPCHAT_PERF", si: 4, insp: 30},
+            {month: "Mar'26", channel: "WALKIN", si: 2, insp: 55},
+            {month: "Mar'26", channel: "BRANCH_BUYER", si: 3, insp: 42},
+            {month: "Apr'26", channel: "CLASSIFIED", si: 80, insp: 1890},
+            {month: "Apr'26", channel: "FB_PERF", si: 144, insp: 2263},
+            {month: "Apr'26", channel: "BRANCH_BUYER", si: 0, insp: 15},
+            {month: "Apr'26", channel: "GROWTH", si: 651, insp: 6070},
+            {month: "Apr'26", channel: "CRITEO", si: 33, insp: 544},
+            {month: "Apr'26", channel: "CRM", si: 95, insp: 1399},
+            {month: "Apr'26", channel: "PROJECT_AADHAAR", si: 501, insp: 8629},
+            {month: "Apr'26", channel: "DSA", si: 58, insp: 1274},
+            {month: "Apr'26", channel: "CC_SELLER", si: 334, insp: 3983},
+            {month: "Apr'26", channel: "ALLIANCES", si: 71, insp: 1131},
+            {month: "Apr'26", channel: "SNAPCHAT_PERF", si: 3, insp: 23},
+            {month: "Apr'26", channel: "WALKIN", si: 0, insp: 20},
+            {month: "Apr'26", channel: "AI", si: 1, insp: 7},
+            {month: "Apr'26", channel: "", si: 29, insp: 3296},
+            {month: "Apr'26", channel: "MSITE", si: 3, insp: 17},
+            {month: "Apr'26", channel: "CC_BUYER", si: 0, insp: 0},
+            {month: "Apr'26", channel: "BOD", si: 2063, insp: 24953},
+            {month: "Apr'26", channel: "AFFILIATES", si: 514, insp: 13193},
+            {month: "Apr'26", channel: "OTHERS", si: 60, insp: 940},
+            {month: "Apr'26", channel: "GOOGLE_PERF", si: 804, insp: 10099},
+            {month: "Dec'26", channel: "GOOGLE_PERF", si: 1510, insp: 14397},
+            {month: "Dec'26", channel: "CRITEO", si: 44, insp: 590},
+            {month: "Dec'26", channel: "OTHERS", si: 59, insp: 659},
+            {month: "Dec'26", channel: "PROJECT_AADHAAR", si: 737, insp: 8585},
+            {month: "Dec'26", channel: "CC_BUYER", si: 0, insp: 1},
+            {month: "Dec'26", channel: "ALLIANCES", si: 177, insp: 1836},
+            {month: "Dec'26", channel: "FB_PERF", si: 330, insp: 4213},
+            {month: "Dec'26", channel: "CRM", si: 146, insp: 1421},
+            {month: "Dec'26", channel: "AFFILIATES", si: 770, insp: 14311},
+            {month: "Dec'26", channel: "GROWTH", si: 1043, insp: 9372},
+            {month: "Dec'26", channel: "BRANCH_BUYER", si: 35, insp: 323},
+            {month: "Dec'26", channel: "DSA", si: 117, insp: 1552},
+            {month: "Dec'26", channel: "MSITE", si: 4, insp: 53},
+            {month: "Dec'26", channel: "WALKIN", si: 3, insp: 70},
+            {month: "Dec'26", channel: "TWITTER_PERF", si: 2, insp: 10},
+            {month: "Dec'26", channel: "BOD", si: 4083, insp: 38147},
+            {month: "Dec'26", channel: "CC_SELLER", si: 652, insp: 6159},
+            {month: "Dec'26", channel: "", si: 54, insp: 5012},
+            {month: "Dec'26", channel: "CLASSIFIED", si: 430, insp: 9215},
+            {month: "Dec'26", channel: "TABOOLA", si: 2, insp: 34},
+            {month: "Dec'26", channel: "SNAPCHAT_PERF", si: 0, insp: 4},
+            {month: "Dec'26", channel: "AI", si: 1, insp: 7}
+        ];
+
+        const months = [...new Set(rawData.map(d => d.month))].sort();
+        const channels = [...new Set(rawData.map(d => d.channel || "Unknown"))].sort();
+
+        let siChart, inspChart, comparisonChart;
+
+        function populateFilters() {
+            const monthFilter = document.getElementById('monthFilter');
+            const channelFilter = document.getElementById('channelFilter');
+
+            months.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = month;
+                monthFilter.appendChild(option);
+            });
+
+            channels.forEach(channel => {
+                const option = document.createElement('option');
+                option.value = channel;
+                option.textContent = channel || "Unknown";
+                channelFilter.appendChild(option);
+            });
+        }
+
+        function getFilteredData() {
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const selectedChannel = document.getElementById('channelFilter').value;
+
+            return rawData.filter(d => {
+                const monthMatch = selectedMonth === "All" || d.month === selectedMonth;
+                const channelMatch = selectedChannel === "All" || d.channel === selectedChannel || (selectedChannel === "Unknown" && !d.channel);
+                return monthMatch && channelMatch;
+            });
+        }
+
+        function updateMetrics(filteredData) {
+            const totalSI = filteredData.reduce((sum, d) => sum + d.si, 0);
+            const totalINSP = filteredData.reduce((sum, d) => sum + d.insp, 0);
+            const siRatio = totalINSP > 0 ? ((totalSI / totalINSP) * 100).toFixed(1) : 0;
+            const uniqueChannels = new Set(filteredData.map(d => d.channel || "Unknown")).size;
+
+            document.getElementById('totalSI').textContent = totalSI.toLocaleString();
+            document.getElementById('totalINSP').textContent = totalINSP.toLocaleString();
+            document.getElementById('siRatio').textContent = siRatio + '%';
+            document.getElementById('channelCount').textContent = uniqueChannels;
+        }
+
+        function updateTable(filteredData) {
+            const tbody = document.getElementById('dataTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(d => {
+                const siPercent = d.insp > 0 ? ((d.si / d.insp) * 100).toFixed(1) + '%' : '0%';
+                const row = `
+                    <tr>
+                        <td>${d.month}</td>
+                        <td>${d.channel || 'Unknown'}</td>
+                        <td>${d.si.toLocaleString()}</td>
+                        <td>${d.insp.toLocaleString()}</td>
+                        <td>${siPercent}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function updateCharts(filteredData) {
+            // Aggregate data by channel
+            const channelData = {};
+            filteredData.forEach(d => {
+                const channel = d.channel || "Unknown";
+                if (!channelData[channel]) {
+                    channelData[channel] = { si: 0, insp: 0 };
+                }
+                channelData[channel].si += d.si;
+                channelData[channel].insp += d.insp;
+            });
+
+            const labels = Object.keys(channelData);
+            const siValues = labels.map(l => channelData[l].si);
+            const inspValues = labels.map(l => channelData[l].insp);
+
+            // Sort by SI descending
+            const sortedIndices = siValues.map((v, i) => i).sort((a, b) => siValues[b] - siValues[a]);
+            const sortedLabels = sortedIndices.map(i => labels[i]);
+            const sortedSI = sortedIndices.map(i => siValues[i]);
+            const sortedINSP = sortedIndices.map(i => inspValues[i]);
+
+            // SI Chart
+            if (siChart) siChart.destroy();
+            siChart = new Chart(document.getElementById('siChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: 'SI',
+                        data: sortedSI,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // INSP Chart
+            if (inspChart) inspChart.destroy();
+            inspChart = new Chart(document.getElementById('inspChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: 'INSP',
+                        data: sortedINSP,
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        borderColor: 'rgba(118, 75, 162, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: { beginAtZero: true }
+                    }
+                }
+            });
+
+            // Comparison Chart
+            if (comparisonChart) comparisonChart.destroy();
+            comparisonChart = new Chart(document.getElementById('comparisonChart'), {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{
+                        label: 'SI',
+                        data: sortedSI,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }, {
+                        label: 'INSP',
+                        data: sortedINSP,
+                        backgroundColor: 'rgba(118, 75, 162, 0.8)',
+                        borderColor: 'rgba(118, 75, 162, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const filteredData = getFilteredData();
+            updateMetrics(filteredData);
+            updateTable(filteredData);
+            updateCharts(filteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById('monthFilter').value = "All";
+            document.getElementById('channelFilter').value = "All";
+            updateDashboard();
+        }
+
+        // Initialize
+        populateFilters();
+        updateDashboard();
+    </script>
+</body>
+</html>
